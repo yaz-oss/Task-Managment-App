@@ -1,84 +1,133 @@
 import { useState } from "react";
+
 import axios from "axios";
+
 import { useNavigate, Link } from "react-router-dom";
+
+import {
+  Mail,
+  Lock,
+  LogIn,
+} from "lucide-react";
 
 function Login() {
   const navigate = useNavigate();
 
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [email, setEmail] =
+    useState("");
 
-  const handleSubmit = async () => {
+  const [password, setPassword] =
+    useState("");
+
+  const handleLogin = async () => {
     try {
-      await axios.post("http://localhost:5000/api/auth/login", {
-        email,
-        password,
-      });
+      const res = await axios.post(
+        "http://localhost:5000/api/auth/login",
+        {
+          email,
+          password,
+        }
+      );
+
+      localStorage.setItem(
+        "token",
+        res.data.token
+      );
+
+      localStorage.setItem(
+        "user",
+        JSON.stringify(res.data.user)
+      );
 
       navigate("/dashboard");
-    } catch {
+    } catch (error) {
       alert("Invalid credentials");
+      console.log(error);
     }
   };
 
   return (
-    <div className="flex h-screen bg-gray-100 dark:bg-gray-900 transition">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-700 via-purple-700 to-pink-600 p-6">
 
-      <div className="hidden md:flex flex-1 bg-gradient-to-br from-indigo-600 to-purple-600 text-white justify-center items-center flex-col">
-        <h1 className="text-4xl font-bold mb-2">TaskFlow</h1>
-        <p className="opacity-80">Stay organized, stay productive</p>
-      </div>
+      <div className="w-full max-w-md bg-white rounded-3xl shadow-2xl p-8">
 
-      <div className="flex flex-1 justify-center items-center">
-        <div className="bg-white dark:bg-gray-800 p-8 rounded-xl shadow-lg w-80">
-          <h2 className="text-2xl font-semibold mb-5 text-center dark:text-white">
-            Login
-          </h2>
+        <div className="text-center mb-8">
 
-          <input
-            placeholder="Email"
-            value={email}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-              setEmail(e.target.value)
-            }
-            className="w-full p-3 mb-3 border rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-          />
+          <h1 className="text-4xl font-bold text-gray-800">
+            Welcome Back
+          </h1>
 
-          <input
-            type="password"
-            placeholder="Password"
-            value={password}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-              setPassword(e.target.value)
-            }
-            className="w-full p-3 mb-4 border rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-          />
-
-          <button
-            onClick={handleSubmit}
-            className="w-full bg-indigo-600 text-white py-3 rounded-md hover:bg-indigo-700 transition"
-          >
-            Login
-          </button>
-
-          <button
-            onClick={() =>
-              (window.location.href =
-                "http://localhost:5000/api/auth/google")
-            }
-            className="w-full mt-3 bg-red-500 text-white py-3 rounded-md"
-          >
-            Continue with Google
-          </button>
-
-          <p className="text-sm mt-4 text-center dark:text-gray-300">
-            Don’t have an account?{" "}
-            <Link to="/register" className="text-indigo-600">
-              Register
-            </Link>
+          <p className="text-gray-500 mt-2">
+            Login to continue
           </p>
+
         </div>
+
+        <div className="space-y-5">
+
+          <div className="flex items-center border rounded-2xl px-4">
+
+            <Mail
+              className="text-gray-400"
+              size={20}
+            />
+
+            <input
+              type="email"
+              placeholder="Email"
+              value={email}
+              onChange={(e) =>
+                setEmail(e.target.value)
+              }
+              className="w-full p-4 outline-none rounded-2xl"
+            />
+
+          </div>
+
+          <div className="flex items-center border rounded-2xl px-4">
+
+            <Lock
+              className="text-gray-400"
+              size={20}
+            />
+
+            <input
+              type="password"
+              placeholder="Password"
+              value={password}
+              onChange={(e) =>
+                setPassword(e.target.value)
+              }
+              className="w-full p-4 outline-none rounded-2xl"
+            />
+
+          </div>
+
+          <button
+            onClick={handleLogin}
+            className="w-full bg-indigo-600 hover:bg-indigo-700 transition-all text-white py-4 rounded-2xl flex items-center justify-center gap-2 font-semibold"
+          >
+            <LogIn size={20} />
+            Login
+          </button>
+
+        </div>
+
+        <p className="text-center text-gray-500 mt-6">
+
+          Don’t have an account?
+
+          <Link
+            to="/register"
+            className="text-indigo-600 font-semibold ml-2"
+          >
+            Register
+          </Link>
+
+        </p>
+
       </div>
+
     </div>
   );
 }
