@@ -1,41 +1,17 @@
-import {
-  useEffect,
-  useState,
-} from "react";
+import { useEffect, useState } from "react";
 
-import {
-  useDispatch,
-  useSelector,
-} from "react-redux";
-
-import type {
-  RootState,
-  AppDispatch,
-} from "../app/store";
-
-import {
-  fetchTasks,
-  addTask,
-  deleteTask,
-  updateTask,
-} from "../features/tasks/taskSlice";
+import axios from "axios";
 
 import {
   LayoutDashboard,
-  Plus,
+  CheckCircle2,
   Trash2,
   Pencil,
-  Save,
-  Check,
   LogOut,
-  Shield,
   Moon,
   Sun,
+  Plus,
 } from "lucide-react";
-
-import {
-  useNavigate,
-} from "react-router-dom";
 
 type Task = {
   id: number;
@@ -46,88 +22,158 @@ type Task = {
 
 function Dashboard() {
 
-  const dispatch =
-    useDispatch<AppDispatch>();
-
-  const navigate =
-    useNavigate();
-
-  const tasks =
-    useSelector(
-      (
-        state: RootState
-      ) =>
-        state.tasks.tasks
-    );
+  const [tasks, setTasks] =
+    useState<Task[]>([]);
 
   const [title, setTitle] =
     useState("");
 
-  const [
-    description,
-    setDescription,
-  ] = useState("");
+  const [description,
+    setDescription] =
+    useState("");
 
-  const [
-    darkMode,
-    setDarkMode,
-  ] = useState(false);
+  const [editingId,
+    setEditingId] =
+    useState<number | null>(null);
 
-  const [
-    editingId,
-    setEditingId,
-  ] = useState<
-    number | null
-  >(null);
+  const [darkMode,
+    setDarkMode] =
+    useState(true);
 
-  const [
-    editTitle,
-    setEditTitle,
-  ] = useState("");
-
-  const [
-    editDescription,
-    setEditDescription,
-  ] = useState("");
-
-  useEffect(() => {
-
-    const token =
-      localStorage.getItem(
-        "token"
-      );
-
-    if (!token) {
-      navigate("/");
-    }
-
-    dispatch(fetchTasks());
-
-  }, [dispatch, navigate]);
-
-  useEffect(() => {
-
-    if (darkMode) {
-
-      document.documentElement.classList.add(
-        "dark"
-      );
-
-    } else {
-
-      document.documentElement.classList.remove(
-        "dark"
-      );
-    }
-
-  }, [darkMode]);
-
-  const user =
-    JSON.parse(
-      localStorage.getItem(
-        "user"
-      ) || "{}"
+  const token =
+    localStorage.getItem(
+      "token"
     );
+
+  const fetchTasks =
+    async () => {
+
+      try {
+
+        const res =
+          await axios.get(
+            "http://localhost:5000/api/tasks",
+
+            {
+              headers: {
+                Authorization:
+                  token,
+              },
+            }
+          );
+
+        setTasks(res.data);
+
+      } catch (error) {
+
+        console.log(error);
+      }
+    };
+
+  useEffect(() => {
+
+    fetchTasks();
+
+  }, []);
+
+  const addTask =
+    async () => {
+
+      if (
+        !title ||
+        !description
+      ) {
+        return;
+      }
+
+      try {
+
+        await axios.post(
+          "http://localhost:5000/api/tasks",
+
+          {
+            title,
+            description,
+          },
+
+          {
+            headers: {
+              Authorization:
+                token,
+            },
+          }
+        );
+
+        setTitle("");
+
+        setDescription("");
+
+        fetchTasks();
+
+      } catch (error) {
+
+        console.log(error);
+      }
+    };
+
+  const deleteTask =
+    async (id: number) => {
+
+      try {
+
+        await axios.delete(
+          `http://localhost:5000/api/tasks/${id}`,
+
+          {
+            headers: {
+              Authorization:
+                token,
+            },
+          }
+        );
+
+        fetchTasks();
+
+      } catch (error) {
+
+        console.log(error);
+      }
+    };
+
+  const updateTask =
+    async () => {
+
+      try {
+
+        await axios.put(
+          `http://localhost:5000/api/tasks/${editingId}`,
+
+          {
+            title,
+            description,
+          },
+
+          {
+            headers: {
+              Authorization:
+                token,
+            },
+          }
+        );
+
+        setEditingId(null);
+
+        setTitle("");
+
+        setDescription("");
+
+        fetchTasks();
+
+      } catch (error) {
+
+        console.log(error);
+      }
+    };
 
   const logout = () => {
 
@@ -135,128 +181,61 @@ function Dashboard() {
       "token"
     );
 
-    localStorage.removeItem(
-      "user"
-    );
-
-    navigate("/");
+    window.location.href =
+      "/";
   };
-
-  const handleAddTask =
-    async () => {
-
-      if (
-        !title ||
-        !description
-      )
-        return;
-
-      await dispatch(
-        addTask({
-          title,
-          description,
-        })
-      );
-
-      setTitle("");
-
-      setDescription("");
-    };
-
-  const handleDelete =
-    async (
-      id: number
-    ) => {
-
-      await dispatch(
-        deleteTask(id)
-      );
-    };
-
-  const handleToggle =
-    async (
-      task: Task
-    ) => {
-
-      await dispatch(
-        updateTask({
-          ...task,
-
-          completed:
-            !task.completed,
-        })
-      );
-    };
-
-  const startEdit = (
-    task: Task
-  ) => {
-
-    setEditingId(task.id);
-
-    setEditTitle(
-      task.title
-    );
-
-    setEditDescription(
-      task.description
-    );
-  };
-
-  const saveEdit =
-    async (
-      id: number
-    ) => {
-
-      const currentTask =
-        tasks.find(
-          (
-            task
-          ) =>
-            task.id === id
-        );
-
-      await dispatch(
-        updateTask({
-          id,
-
-          title:
-            editTitle,
-
-          description:
-            editDescription,
-
-          completed:
-            currentTask?.completed,
-        })
-      );
-
-      setEditingId(null);
-    };
 
   return (
 
-    <div className="flex min-h-screen bg-gray-100 dark:bg-gray-900 transition-all">
+    <div
+      className={`min-h-screen flex ${
+        darkMode
+          ? "bg-[#0f172a] text-white"
+          : "bg-gray-100 text-black"
+      }`}
+    >
 
-      <aside className="w-72 bg-indigo-700 text-white p-6 flex flex-col shadow-2xl">
+      <div
+        className={`w-[260px] p-6 flex flex-col justify-between ${
+          darkMode
+            ? "bg-[#111827]"
+            : "bg-white"
+        } shadow-2xl`}
+      >
 
         <div>
 
-          <h1 className="text-3xl font-bold mb-10">
-            TaskFlow
-          </h1>
+          <div className="flex items-center gap-3 mb-12">
 
-          <button className="w-full bg-white text-indigo-700 flex items-center gap-3 px-4 py-4 rounded-2xl font-semibold">
+            <LayoutDashboard
+              size={34}
+            />
 
-            <LayoutDashboard size={22} />
+            <h1 className="text-2xl font-bold">
 
-            Dashboard
+              TaskFlow
 
-          </button>
+            </h1>
+
+          </div>
+
+          <div className="space-y-4">
+
+            <div className="flex items-center gap-3 bg-blue-600 p-4 rounded-2xl cursor-pointer">
+
+              <CheckCircle2 />
+
+              <span>
+                Dashboard
+              </span>
+
+            </div>
+
+          </div>
 
         </div>
 
-        <div className="mt-auto space-y-4">
+        <div className="space-y-4">
 
           <button
             onClick={() =>
@@ -264,27 +243,25 @@ function Dashboard() {
                 !darkMode
               )
             }
-            className="w-full bg-gray-200 text-black dark:bg-gray-800 dark:text-white flex items-center justify-center gap-2 py-4 rounded-2xl"
+            className="w-full flex items-center justify-center gap-3 p-4 rounded-2xl bg-gray-700 hover:bg-gray-600 transition"
           >
 
             {darkMode ? (
-              <Sun size={18} />
+              <Sun />
             ) : (
-              <Moon size={18} />
+              <Moon />
             )}
 
-            {darkMode
-              ? "Light Mode"
-              : "Dark Mode"}
+            Theme
 
           </button>
 
           <button
             onClick={logout}
-            className="w-full bg-red-500 hover:bg-red-600 flex items-center justify-center gap-2 py-4 rounded-2xl"
+            className="w-full flex items-center justify-center gap-3 p-4 rounded-2xl bg-red-600 hover:bg-red-700 transition"
           >
 
-            <LogOut size={18} />
+            <LogOut />
 
             Logout
 
@@ -292,55 +269,47 @@ function Dashboard() {
 
         </div>
 
-      </aside>
+      </div>
 
-      <main className="flex-1 p-10">
+      <div className="flex-1 p-10">
 
         <div className="flex justify-between items-center mb-10">
 
           <div>
 
-            <h1 className="text-4xl font-bold dark:text-white">
+            <h1 className="text-4xl font-bold">
 
-              Welcome{" "}
-              {user.username}
+              Welcome Back
 
             </h1>
 
-            <p className="text-gray-500 dark:text-gray-300 mt-2">
+            <p className="text-gray-400 mt-2">
 
-              Manage your tasks professionally
+              Manage your tasks beautifully
 
             </p>
 
           </div>
 
-          <div className="bg-white dark:bg-gray-800 px-6 py-4 rounded-2xl shadow-lg flex items-center gap-3">
-
-            <Shield
-              className="text-indigo-600"
-              size={22}
-            />
-
-            <span className="font-semibold dark:text-white capitalize">
-
-              {user.role}
-
-            </span>
-
-          </div>
-
         </div>
 
-        <div className="bg-white dark:bg-gray-800 rounded-3xl shadow-xl p-6 mb-8">
+        <div
+          className={`p-6 rounded-3xl mb-10 ${
+            darkMode
+              ? "bg-[#111827]"
+              : "bg-white"
+          } shadow-xl`}
+        >
 
-          <h2 className="text-2xl font-bold mb-6 dark:text-white">
+          <h2 className="text-2xl font-bold mb-6">
 
-            Create Task
+            {editingId
+              ? "Update Task"
+              : "Create Task"}
 
           </h2>
 
-          <div className="grid md:grid-cols-3 gap-4">
+          <div className="grid md:grid-cols-2 gap-5">
 
             <input
               type="text"
@@ -351,211 +320,134 @@ function Dashboard() {
                   e.target.value
                 )
               }
-              className="p-4 rounded-2xl border dark:bg-gray-700 dark:text-white outline-none"
+              className={`p-4 rounded-2xl outline-none ${
+                darkMode
+                  ? "bg-[#1f2937]"
+                  : "bg-gray-100"
+              }`}
             />
 
             <input
               type="text"
               placeholder="Task description"
-              value={
-                description
-              }
+              value={description}
               onChange={(e) =>
                 setDescription(
                   e.target.value
                 )
               }
-              className="p-4 rounded-2xl border dark:bg-gray-700 dark:text-white outline-none"
+              className={`p-4 rounded-2xl outline-none ${
+                darkMode
+                  ? "bg-[#1f2937]"
+                  : "bg-gray-100"
+              }`}
             />
-
-            <button
-              onClick={
-                handleAddTask
-              }
-              className="bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl flex items-center justify-center gap-2"
-            >
-
-              <Plus size={20} />
-
-              Add Task
-
-            </button>
 
           </div>
 
+          <button
+            onClick={
+              editingId
+                ? updateTask
+                : addTask
+            }
+            className="mt-6 bg-blue-600 hover:bg-blue-700 px-6 py-4 rounded-2xl flex items-center gap-3 transition"
+          >
+
+            <Plus />
+
+            {editingId
+              ? "Update Task"
+              : "Add Task"}
+
+          </button>
+
         </div>
 
-        <div className="grid gap-5">
+        <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-6">
 
-          {tasks.map(
-            (task: Task) => (
+          {tasks.map((task) => (
 
-              <div
-                key={task.id}
-                className="bg-white dark:bg-gray-800 rounded-3xl shadow-lg p-6"
-              >
+            <div
+              key={task.id}
+              className={`p-6 rounded-3xl shadow-xl ${
+                darkMode
+                  ? "bg-[#111827]"
+                  : "bg-white"
+              }`}
+            >
 
-                {editingId ===
-                task.id ? (
+              <div className="flex justify-between items-start mb-5">
 
-                  <div className="space-y-4">
+                <div>
 
-                    <input
-                      value={
-                        editTitle
-                      }
-                      onChange={(
-                        e
-                      ) =>
-                        setEditTitle(
-                          e.target
-                            .value
-                        )
-                      }
-                      className="w-full p-4 rounded-2xl border dark:bg-gray-700 dark:text-white"
-                    />
+                  <h2 className="text-2xl font-bold">
 
-                    <textarea
-                      value={
-                        editDescription
-                      }
-                      onChange={(
-                        e
-                      ) =>
-                        setEditDescription(
-                          e.target
-                            .value
-                        )
-                      }
-                      className="w-full p-4 rounded-2xl border dark:bg-gray-700 dark:text-white"
-                    />
+                    {task.title}
 
-                    <button
-                      onClick={() =>
-                        saveEdit(
-                          task.id
-                        )
-                      }
-                      className="bg-green-500 hover:bg-green-600 text-white px-5 py-3 rounded-2xl flex items-center gap-2"
-                    >
+                  </h2>
 
-                      <Save size={18} />
+                  <p className="text-gray-400 mt-2">
 
-                      Save
+                    {
+                      task.description
+                    }
 
-                    </button>
+                  </p>
 
-                  </div>
-
-                ) : (
-
-                  <div className="flex justify-between items-start">
-
-                    <div>
-
-                      <div className="flex items-center gap-3 mb-2">
-
-                        <div
-                          className={`w-3 h-3 rounded-full ${
-                            task.completed
-                              ? "bg-green-500"
-                              : "bg-yellow-400"
-                          }`}
-                        />
-
-                        <h2
-                          className={`text-2xl font-bold dark:text-white ${
-                            task.completed
-                              ? "line-through text-gray-400"
-                              : ""
-                          }`}
-                        >
-
-                          {
-                            task.title
-                          }
-
-                        </h2>
-
-                      </div>
-
-                      <p
-                        className={`${
-                          task.completed
-                            ? "text-gray-400"
-                            : "text-gray-500 dark:text-gray-300"
-                        }`}
-                      >
-
-                        {
-                          task.description
-                        }
-
-                      </p>
-
-                    </div>
-
-                    <div className="flex gap-3">
-
-                      <button
-                        onClick={() =>
-                          handleToggle(
-                            task
-                          )
-                        }
-                        className="p-3 bg-green-100 text-green-600 rounded-xl"
-                      >
-
-                        <Check
-                          size={18}
-                        />
-
-                      </button>
-
-                      <button
-                        onClick={() =>
-                          startEdit(
-                            task
-                          )
-                        }
-                        className="p-3 bg-blue-100 text-blue-600 rounded-xl"
-                      >
-
-                        <Pencil
-                          size={18}
-                        />
-
-                      </button>
-
-                      <button
-                        onClick={() =>
-                          handleDelete(
-                            task.id
-                          )
-                        }
-                        className="p-3 bg-red-100 text-red-600 rounded-xl"
-                      >
-
-                        <Trash2
-                          size={18}
-                        />
-
-                      </button>
-
-                    </div>
-
-                  </div>
-
-                )}
+                </div>
 
               </div>
 
-            )
-          )}
+              <div className="flex gap-4 mt-6">
+
+                <button
+                  onClick={() => {
+
+                    setEditingId(
+                      task.id
+                    );
+
+                    setTitle(
+                      task.title
+                    );
+
+                    setDescription(
+                      task.description
+                    );
+                  }}
+                  className="flex-1 bg-yellow-500 hover:bg-yellow-600 py-3 rounded-2xl flex items-center justify-center gap-2 transition"
+                >
+
+                  <Pencil size={18} />
+
+                  Edit
+
+                </button>
+
+                <button
+                  onClick={() =>
+                    deleteTask(
+                      task.id
+                    )
+                  }
+                  className="flex-1 bg-red-600 hover:bg-red-700 py-3 rounded-2xl flex items-center justify-center gap-2 transition"
+                >
+
+                  <Trash2 size={18} />
+
+                  Delete
+
+                </button>
+
+              </div>
+
+            </div>
+          ))}
 
         </div>
 
-      </main>
+      </div>
 
     </div>
   );
