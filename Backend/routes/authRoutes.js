@@ -1,14 +1,63 @@
-const express = require("express");
+router.post(
+  "/register",
 
-const router = express.Router();
+  async (req, res) => {
 
-const {
-  register,
-  login,
-} = require("../controllers/authController");
+    try {
 
-router.post("/register", register);
+      const {
+        username,
+        email,
+        password,
+      } = req.body;
 
-router.post("/login", login);
+      const existingUser =
+        await User.findOne({
+          where: { email },
+        });
 
-module.exports = router;
+      if (existingUser) {
+
+        return res.status(400).json({
+          message:
+            "Email already exists",
+        });
+      }
+
+      const hashedPassword =
+        await bcrypt.hash(
+          password,
+          10
+        );
+
+      const totalUsers =
+        await User.count();
+
+      let role = "user";
+
+      if (totalUsers === 0) {
+        role = "admin";
+      }
+
+      const user =
+        await User.create({
+          username,
+          email,
+          password:
+            hashedPassword,
+          role,
+        });
+
+      res.json({
+        message:
+          "Account created",
+
+        user,
+      });
+
+    } catch (error) {
+
+      res.status(500).json(error);
+    }
+  }
+);
