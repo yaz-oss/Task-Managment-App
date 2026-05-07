@@ -5,46 +5,114 @@ import {
 
 import axios from "axios";
 
-const API = "http://localhost:5000/api/tasks";
+const API =
+  "http://localhost:5000/api/tasks";
 
-export const fetchTasks = createAsyncThunk(
-  "tasks/fetchTasks",
-  async () => {
-    const res = await axios.get(API);
-    return res.data;
-  }
-);
+export const fetchTasks =
+  createAsyncThunk(
+    "tasks/fetchTasks",
 
-export const addTask = createAsyncThunk(
-  "tasks/addTask",
-  async (task: {
-    title: string;
-    description: string;
-  }) => {
-    const res = await axios.post(API, task);
-    return res.data;
-  }
-);
+    async () => {
+      const token =
+        localStorage.getItem(
+          "token"
+        );
 
-export const deleteTask = createAsyncThunk(
-  "tasks/deleteTask",
-  async (id: number) => {
-    await axios.delete(`${API}/${id}`);
-    return id;
-  }
-);
+      const res = await axios.get(
+        API,
+        {
+          headers: {
+            Authorization:
+              token,
+          },
+        }
+      );
 
-export const updateTask = createAsyncThunk(
-  "tasks/updateTask",
-  async (task: any) => {
-    const res = await axios.put(
-      `${API}/${task.id}`,
-      task
-    );
+      return res.data;
+    }
+  );
 
-    return res.data;
-  }
-);
+export const addTask =
+  createAsyncThunk(
+    "tasks/addTask",
+
+    async (task: {
+      title: string;
+      description: string;
+    }) => {
+
+      const token =
+        localStorage.getItem(
+          "token"
+        );
+
+      const res =
+        await axios.post(
+          API,
+          task,
+          {
+            headers: {
+              Authorization:
+                token,
+            },
+          }
+        );
+
+      return res.data;
+    }
+  );
+
+export const deleteTask =
+  createAsyncThunk(
+    "tasks/deleteTask",
+
+    async (id: number) => {
+
+      const token =
+        localStorage.getItem(
+          "token"
+        );
+
+      await axios.delete(
+        `${API}/${id}`,
+        {
+          headers: {
+            Authorization:
+              token,
+          },
+        }
+      );
+
+      return id;
+    }
+  );
+
+export const updateTask =
+  createAsyncThunk(
+    "tasks/updateTask",
+
+    async (task: any) => {
+
+      const token =
+        localStorage.getItem(
+          "token"
+        );
+
+      const res =
+        await axios.put(
+          `${API}/${task.id}`,
+          task,
+          {
+            headers: {
+              Authorization:
+                token,
+            },
+          }
+        );
+
+      return res.data;
+    }
+  );
 
 type Task = {
   id: number;
@@ -63,31 +131,73 @@ const initialState: TaskState = {
 
 const taskSlice = createSlice({
   name: "tasks",
+
   initialState,
+
   reducers: {},
 
-  extraReducers: (builder) => {
-    builder.addCase(fetchTasks.fulfilled, (state, action) => {
-      state.tasks = action.payload;
-    });
+  extraReducers: (
+    builder
+  ) => {
 
-    builder.addCase(addTask.fulfilled, (state, action) => {
-      state.tasks.push(action.payload);
-    });
+    builder.addCase(
+      fetchTasks.fulfilled,
+      (
+        state,
+        action
+      ) => {
+        state.tasks =
+          action.payload;
+      }
+    );
 
-    builder.addCase(deleteTask.fulfilled, (state, action) => {
-      state.tasks = state.tasks.filter(
-        (task) => task.id !== action.payload
-      );
-    });
+    builder.addCase(
+      addTask.fulfilled,
+      (
+        state,
+        action
+      ) => {
+        state.tasks.push(
+          action.payload
+        );
+      }
+    );
 
-    builder.addCase(updateTask.fulfilled, (state, action) => {
-      state.tasks = state.tasks.map((task) =>
-        task.id === action.payload.id
-          ? action.payload
-          : task
-      );
-    });
+    builder.addCase(
+      deleteTask.fulfilled,
+      (
+        state,
+        action
+      ) => {
+        state.tasks =
+          state.tasks.filter(
+            (
+              task
+            ) =>
+              task.id !==
+              action.payload
+          );
+      }
+    );
+
+    builder.addCase(
+      updateTask.fulfilled,
+      (
+        state,
+        action
+      ) => {
+        state.tasks =
+          state.tasks.map(
+            (
+              task
+            ) =>
+              task.id ===
+              action.payload.id
+                ? action.payload
+                : task
+          );
+      }
+    );
   },
 });
 
