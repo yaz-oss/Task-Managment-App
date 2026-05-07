@@ -1,6 +1,20 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
-import {LayoutDashboard,ListTodo,Settings,LogOut,Moon,Sun,Plus,Trash2,Check,Pencil,Save,} from "lucide-react";
+
+import { LayoutDashboard,ListTodo,Settings,LogOut,Moon,Sun,Plus,Trash2,Pencil,Save,Check,} from "lucide-react";
+
+import { useDispatch, useSelector } from "react-redux";
+
+import {
+  fetchTasks,
+  addTask,
+  deleteTask,
+  updateTask,
+} from "../features/tasks/taskSlice";
+
+import type {
+  RootState,
+  AppDispatch,
+} from "../app/store";
 
 type Task = {
   id: number;
@@ -10,159 +24,165 @@ type Task = {
 };
 
 function Dashboard() {
-  const API = "http://localhost:5000/api/tasks";
+  const dispatch = useDispatch<AppDispatch>();
 
-  const [tasks, setTasks] = useState<Task[]>([]);
+  const tasks = useSelector(
+    (state: RootState) => state.tasks.tasks
+  );
+
   const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [dark, setDark] = useState(false);
+  const [description, setDescription] =
+    useState("");
 
-  const [editingId, setEditingId] = useState<number | null>(null);
-  const [editTitle, setEditTitle] = useState("");
-  const [editDesc, setEditDesc] = useState("");
+  const [darkMode, setDarkMode] =
+    useState(false);
 
-  const fetchTasks = async () => {
-    try {
-      const res = await axios.get(API);
-      setTasks(res.data);
-    } catch (err) {
-      console.log(err);
+  const [editingId, setEditingId] =
+    useState<number | null>(null);
+
+  const [editTitle, setEditTitle] =
+    useState("");
+
+  const [editDescription, setEditDescription] =
+    useState("");
+
+  useEffect(() => {
+    dispatch(fetchTasks());
+  }, [dispatch]);
+
+  useEffect(() => {
+    if (darkMode) {
+      document.documentElement.classList.add(
+        "dark"
+      );
+    } else {
+      document.documentElement.classList.remove(
+        "dark"
+      );
     }
-  };
+  }, [darkMode]);
 
-  useEffect(() => {
-    fetchTasks();
-  }, []);
-
-  useEffect(() => {
-    document.documentElement.classList.toggle("dark", dark);
-  }, [dark]);
-
-  const addTask = async () => {
+  const handleAddTask = async () => {
     if (!title || !description) return;
 
-    try {
-      await axios.post(API, {
+    await dispatch(
+      addTask({
         title,
         description,
-      });
+      })
+    );
 
-      setTitle("");
-      setDescription("");
-
-      fetchTasks();
-    } catch (err) {
-      console.log(err);
-    }
+    setTitle("");
+    setDescription("");
   };
 
-  const deleteTask = async (id: number) => {
-    try {
-      await axios.delete(`${API}/${id}`);
-      fetchTasks();
-    } catch (err) {
-      console.log(err);
-    }
+  const handleDelete = async (id: number) => {
+    await dispatch(deleteTask(id));
   };
 
-  const toggleComplete = async (task: Task) => {
-    try {
-      await axios.put(`${API}/${task.id}`, {
+  const handleToggleComplete = async (
+    task: Task
+  ) => {
+    await dispatch(
+      updateTask({
         ...task,
         completed: !task.completed,
-      });
-
-      fetchTasks();
-    } catch (err) {
-      console.log(err);
-    }
+      })
+    );
   };
 
   const startEdit = (task: Task) => {
     setEditingId(task.id);
     setEditTitle(task.title);
-    setEditDesc(task.description);
+    setEditDescription(task.description);
   };
 
   const saveEdit = async (id: number) => {
-    try {
-      await axios.put(`${API}/${id}`, {
+    await dispatch(
+      updateTask({
+        id,
         title: editTitle,
-        description: editDesc,
-      });
+        description: editDescription,
+        completed: false,
+      })
+    );
 
-      setEditingId(null);
-
-      fetchTasks();
-    } catch (err) {
-      console.log(err);
-    }
+    setEditingId(null);
   };
 
   return (
-    <div className="flex h-screen bg-gray-100 dark:bg-gray-900 transition-all duration-300">
+    <div className="flex min-h-screen bg-gray-100 dark:bg-gray-900 transition-all duration-300">
 
-      <div className="w-64 bg-white dark:bg-gray-800 shadow-2xl p-5 flex flex-col">
+      <aside className="w-64 bg-white dark:bg-gray-800 shadow-xl p-6 flex flex-col">
 
         <h1 className="text-3xl font-bold text-indigo-600 mb-10">
           TaskFlow
         </h1>
 
-        <nav className="flex flex-col gap-3">
+        <nav className="flex flex-col gap-4">
 
-          <button className="flex items-center gap-3 bg-indigo-600 text-white px-4 py-3 rounded-xl">
+          <button className="flex items-center gap-3 bg-indigo-600 text-white px-4 py-3 rounded-2xl">
             <LayoutDashboard size={20} />
             Dashboard
           </button>
 
-          <button className="flex items-center gap-3 hover:bg-gray-200 dark:hover:bg-gray-700 px-4 py-3 rounded-xl dark:text-white transition">
+          <button className="flex items-center gap-3 px-4 py-3 rounded-2xl hover:bg-gray-200 dark:hover:bg-gray-700 dark:text-white transition">
             <ListTodo size={20} />
             Tasks
           </button>
 
-          <button className="flex items-center gap-3 hover:bg-gray-200 dark:hover:bg-gray-700 px-4 py-3 rounded-xl dark:text-white transition">
+          <button className="flex items-center gap-3 px-4 py-3 rounded-2xl hover:bg-gray-200 dark:hover:bg-gray-700 dark:text-white transition">
             <Settings size={20} />
             Settings
           </button>
+
         </nav>
 
         <div className="mt-auto flex flex-col gap-3">
 
           <button
-            onClick={() => setDark(!dark)}
-            className="flex items-center justify-center gap-2 bg-gray-200 dark:bg-gray-700 dark:text-white py-3 rounded-xl transition"
+            onClick={() =>
+              setDarkMode(!darkMode)
+            }
+            className="flex items-center justify-center gap-2 bg-gray-200 dark:bg-gray-700 dark:text-white py-3 rounded-2xl"
           >
-            {dark ? <Sun size={18} /> : <Moon size={18} />}
-            {dark ? "Light Mode" : "Dark Mode"}
+            {darkMode ? (
+              <Sun size={18} />
+            ) : (
+              <Moon size={18} />
+            )}
+
+            {darkMode
+              ? "Light Mode"
+              : "Dark Mode"}
           </button>
 
-          <button className="flex items-center justify-center gap-2 bg-red-500 hover:bg-red-600 text-white py-3 rounded-xl transition">
+          <button className="flex items-center justify-center gap-2 bg-red-500 hover:bg-red-600 text-white py-3 rounded-2xl">
             <LogOut size={18} />
             Logout
           </button>
 
         </div>
-      </div>
 
-      <div className="flex-1 overflow-auto p-8">
+      </aside>
 
-        <div className="flex justify-between items-center mb-8">
+      <main className="flex-1 p-8">
 
-          <div>
-            <h2 className="text-3xl font-bold dark:text-white">
-              Welcome Back 👋
-            </h2>
+        <div className="mb-8">
 
-            <p className="text-gray-500 dark:text-gray-300">
-              Manage your daily tasks easily
-            </p>
-          </div>
+          <h2 className="text-4xl font-bold dark:text-white">
+            Welcome Back 👋
+          </h2>
+
+          <p className="text-gray-500 dark:text-gray-300">
+            Manage your tasks professionally
+          </p>
 
         </div>
 
         <div className="bg-white dark:bg-gray-800 p-6 rounded-3xl shadow-lg mb-8">
 
-          <h3 className="text-xl font-semibold mb-5 dark:text-white">
+          <h3 className="text-2xl font-semibold mb-6 dark:text-white">
             Create New Task
           </h3>
 
@@ -172,75 +192,82 @@ function Dashboard() {
               type="text"
               placeholder="Task title"
               value={title}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+              onChange={(e) =>
                 setTitle(e.target.value)
               }
-              className="p-4 rounded-2xl border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white outline-none"
+              className="p-4 rounded-2xl border dark:bg-gray-700 dark:text-white outline-none"
             />
 
             <input
               type="text"
               placeholder="Task description"
               value={description}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+              onChange={(e) =>
                 setDescription(e.target.value)
               }
-              className="p-4 rounded-2xl border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white outline-none"
+              className="p-4 rounded-2xl border dark:bg-gray-700 dark:text-white outline-none"
             />
 
             <button
-              onClick={addTask}
-              className="flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl transition-all duration-300"
+              onClick={handleAddTask}
+              className="flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl"
             >
               <Plus size={20} />
               Add Task
             </button>
 
           </div>
+
         </div>
 
-        <div className="grid gap-4">
+        <div className="grid gap-5">
 
-          {tasks.map((task) => (
+          {tasks.map((task: Task) => (
+
             <div
               key={task.id}
-              className={`group bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl p-5 shadow-sm hover:shadow-2xl transition-all duration-300 ${
-                task.completed ? "opacity-70" : ""
-              }`}
+              className="bg-white dark:bg-gray-800 rounded-3xl shadow-lg p-6 hover:shadow-2xl transition-all duration-300"
             >
 
               {editingId === task.id ? (
+
                 <div className="space-y-4">
 
                   <input
                     value={editTitle}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    onChange={(e) =>
                       setEditTitle(e.target.value)
                     }
                     className="w-full p-4 rounded-2xl border dark:bg-gray-700 dark:text-white"
                   />
 
                   <textarea
-                    value={editDesc}
-                    onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
-                      setEditDesc(e.target.value)
+                    value={editDescription}
+                    onChange={(e) =>
+                      setEditDescription(
+                        e.target.value
+                      )
                     }
                     className="w-full p-4 rounded-2xl border dark:bg-gray-700 dark:text-white"
                   />
 
                   <button
-                    onClick={() => saveEdit(task.id)}
-                    className="flex items-center gap-2 bg-green-500 hover:bg-green-600 text-white px-5 py-3 rounded-2xl transition"
+                    onClick={() =>
+                      saveEdit(task.id)
+                    }
+                    className="flex items-center gap-2 bg-green-500 hover:bg-green-600 text-white px-5 py-3 rounded-2xl"
                   >
                     <Save size={18} />
-                    Save Changes
+                    Save
                   </button>
 
                 </div>
-              ) : (
-                <div className="flex justify-between items-start gap-4">
 
-                  <div className="flex-1">
+              ) : (
+
+                <div className="flex justify-between items-start">
+
+                  <div>
 
                     <div className="flex items-center gap-3 mb-2">
 
@@ -253,7 +280,7 @@ function Dashboard() {
                       />
 
                       <h3
-                        className={`text-xl font-semibold dark:text-white ${
+                        className={`text-2xl font-semibold dark:text-white ${
                           task.completed
                             ? "line-through text-gray-400"
                             : ""
@@ -265,7 +292,7 @@ function Dashboard() {
                     </div>
 
                     <p
-                      className={`text-sm ${
+                      className={`${
                         task.completed
                           ? "text-gray-400"
                           : "text-gray-500 dark:text-gray-300"
@@ -276,29 +303,31 @@ function Dashboard() {
 
                   </div>
 
-                  <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300">
+                  <div className="flex gap-2">
 
                     <button
-                      onClick={() => toggleComplete(task)}
-                      className={`p-3 rounded-xl transition ${
-                        task.completed
-                          ? "bg-yellow-100 text-yellow-600 hover:bg-yellow-200"
-                          : "bg-green-100 text-green-600 hover:bg-green-200"
-                      }`}
+                      onClick={() =>
+                        handleToggleComplete(task)
+                      }
+                      className="p-3 rounded-xl bg-green-100 text-green-600 hover:bg-green-200"
                     >
                       <Check size={18} />
                     </button>
 
                     <button
-                      onClick={() => startEdit(task)}
-                      className="p-3 rounded-xl bg-blue-100 text-blue-600 hover:bg-blue-200 transition"
+                      onClick={() =>
+                        startEdit(task)
+                      }
+                      className="p-3 rounded-xl bg-blue-100 text-blue-600 hover:bg-blue-200"
                     >
                       <Pencil size={18} />
                     </button>
 
                     <button
-                      onClick={() => deleteTask(task.id)}
-                      className="p-3 rounded-xl bg-red-100 text-red-600 hover:bg-red-200 transition"
+                      onClick={() =>
+                        handleDelete(task.id)
+                      }
+                      className="p-3 rounded-xl bg-red-100 text-red-600 hover:bg-red-200"
                     >
                       <Trash2 size={18} />
                     </button>
@@ -306,14 +335,16 @@ function Dashboard() {
                   </div>
 
                 </div>
+
               )}
 
             </div>
+
           ))}
 
         </div>
 
-      </div>
+      </main>
 
     </div>
   );
