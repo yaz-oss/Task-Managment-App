@@ -28,9 +28,8 @@ const authRoutes = require("./routes/authRoutes");
 app.use("/api/tasks", taskRoutes);
 app.use("/api/auth", authRoutes);
 
-sequelize.sync().then(() => {
+sequelize.sync({ alter: true }).then(() => {
   app.listen(5000, () => {
     console.log("Server running on port 5000");
   });
 });
-sequelize.sync({ alter: true });
