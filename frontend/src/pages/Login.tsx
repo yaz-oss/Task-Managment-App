@@ -1,21 +1,30 @@
-import { useState } from "react";
+// Frontend/src/pages/Login.tsx
+
+import {
+  useState,
+} from "react";
 
 import axios from "axios";
 
 import {
-  Link,
   useNavigate,
+  Link,
 } from "react-router-dom";
 
 import {
-  Mail,
-  Lock,
+  Moon,
+  Sun,
+  ShieldCheck,
 } from "lucide-react";
 
 function Login() {
 
   const navigate =
     useNavigate();
+
+  const [darkMode,
+    setDarkMode] =
+    useState(true);
 
   const [email,
     setEmail] =
@@ -26,11 +35,15 @@ function Login() {
     useState("");
 
   const handleLogin =
-    async () => {
+    async (
+      e: React.FormEvent
+    ) => {
+
+      e.preventDefault();
 
       try {
 
-        const res =
+        const response =
           await axios.post(
             "http://localhost:5000/api/auth/login",
 
@@ -42,20 +55,36 @@ function Login() {
 
         localStorage.setItem(
           "token",
-          res.data.token
+          response.data.token
+        );
+
+        localStorage.setItem(
+          "username",
+          response.data.username
         );
 
         localStorage.setItem(
           "role",
-          res.data.role
+          response.data.role
         );
 
-        navigate("/dashboard");
+        if (
+          response.data.role ===
+          "admin"
+        ) {
+
+          navigate("/admin");
+
+        } else {
+
+          navigate("/dashboard");
+        }
 
       } catch (error: any) {
 
         alert(
-          error.response?.data?.message ||
+          error.response?.data
+            ?.message ||
           "Login failed"
         );
       }
@@ -63,19 +92,54 @@ function Login() {
 
   return (
 
-    <div className="min-h-screen flex items-center justify-center bg-[#0f172a] px-4">
+    <div className={`min-h-screen flex items-center justify-center transition-all duration-500 ${
+      darkMode
+        ? "bg-[#020617]"
+        : "bg-gray-100"
+    }`}>
 
-      <div className="w-full max-w-md bg-[#111827] border border-gray-800 rounded-3xl p-8 shadow-2xl">
+      <button
+        onClick={() =>
+          setDarkMode(
+            !darkMode
+          )
+        }
+        className={`absolute top-6 right-6 p-3 rounded-full ${
+          darkMode
+            ? "bg-[#111827] text-white"
+            : "bg-white text-black"
+        }`}
+      >
 
-        <div className="mb-8 text-center">
+        {darkMode
+          ? <Sun />
+          : <Moon />}
 
-          <h1 className="text-4xl font-bold text-white mb-2">
+      </button>
+
+      <div className={`w-[420px] p-10 rounded-[35px] shadow-2xl border transition-all ${
+        darkMode
+          ? "bg-[#111827] border-gray-800 text-white"
+          : "bg-white border-gray-200 text-black"
+      }`}>
+
+        <div className="flex flex-col items-center mb-8">
+
+          <div className="bg-blue-600 p-5 rounded-3xl mb-5">
+
+            <ShieldCheck
+              size={40}
+            />
+
+          </div>
+
+          <h1 className="text-4xl font-bold">
 
             Welcome Back
 
           </h1>
 
-          <p className="text-gray-400">
+          <p className="text-gray-400 mt-2">
 
             Login to continue
 
@@ -83,81 +147,68 @@ function Login() {
 
         </div>
 
-        <div className="space-y-5">
+        <form
+          onSubmit={handleLogin}
+          className="space-y-5"
+        >
 
-          <div className="relative">
+          <input
+            type="email"
+            placeholder="Email"
+            value={email}
+            onChange={(e) =>
+              setEmail(
+                e.target.value
+              )
+            }
+            className={`w-full p-4 rounded-2xl outline-none ${
+              darkMode
+                ? "bg-[#1e293b]"
+                : "bg-gray-100"
+            }`}
+          />
 
-            <Mail
-              className="absolute left-4 top-4 text-gray-500"
-              size={20}
-            />
-
-            <input
-              type="email"
-              placeholder="Email"
-              value={email}
-              onChange={(e) =>
-                setEmail(
-                  e.target.value
-                )
-              }
-              className="w-full bg-[#1f2937] text-white placeholder-gray-500 border border-gray-700 rounded-2xl py-4 pl-12 pr-4 outline-none focus:border-blue-500 transition"
-            />
-
-          </div>
-
-          <div className="relative">
-
-            <Lock
-              className="absolute left-4 top-4 text-gray-500"
-              size={20}
-            />
-
-            <input
-              type="password"
-              placeholder="Password"
-              value={password}
-              onChange={(e) =>
-                setPassword(
-                  e.target.value
-                )
-              }
-              className="w-full bg-[#1f2937] text-white placeholder-gray-500 border border-gray-700 rounded-2xl py-4 pl-12 pr-4 outline-none focus:border-blue-500 transition"
-            />
-
-          </div>
+          <input
+            type="password"
+            placeholder="Password"
+            value={password}
+            onChange={(e) =>
+              setPassword(
+                e.target.value
+              )
+            }
+            className={`w-full p-4 rounded-2xl outline-none ${
+              darkMode
+                ? "bg-[#1e293b]"
+                : "bg-gray-100"
+            }`}
+          />
 
           <button
-            onClick={
-              handleLogin
-            }
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white py-4 rounded-2xl font-semibold transition-all"
+            type="submit"
+            className="w-full bg-blue-600 hover:bg-blue-700 transition-all p-4 rounded-2xl text-white font-bold"
           >
 
             Login
 
           </button>
 
-        </div>
+        </form>
 
-        <div className="mt-8 text-center">
+        <p className="text-center mt-6 text-gray-400">
 
-          <p className="text-gray-400">
+          Don't have account?
 
-            Don’t have an account?
+          <Link
+            to="/register"
+            className="text-blue-500 ml-2"
+          >
 
-            <Link
-              to="/register"
-              className="text-blue-500 ml-2 hover:text-blue-400"
-            >
+            Register
 
-              Register
+          </Link>
 
-            </Link>
-
-          </p>
-
-        </div>
+        </p>
 
       </div>
 

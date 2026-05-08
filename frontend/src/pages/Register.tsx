@@ -1,22 +1,30 @@
-import { useState } from "react";
+// Frontend/src/pages/Register.tsx
+
+import {
+  useState,
+} from "react";
 
 import axios from "axios";
 
 import {
-  Link,
   useNavigate,
+  Link,
 } from "react-router-dom";
 
 import {
-  Mail,
-  Lock,
-  User,
+  Moon,
+  Sun,
+  UserPlus,
 } from "lucide-react";
 
 function Register() {
 
   const navigate =
     useNavigate();
+
+  const [darkMode,
+    setDarkMode] =
+    useState(true);
 
   const [username,
     setUsername] =
@@ -31,7 +39,11 @@ function Register() {
     useState("");
 
   const handleRegister =
-    async () => {
+    async (
+      e: React.FormEvent
+    ) => {
+
+      e.preventDefault();
 
       try {
 
@@ -46,7 +58,7 @@ function Register() {
         );
 
         alert(
-          "Account created successfully"
+          "Registration successful"
         );
 
         navigate("/");
@@ -54,7 +66,8 @@ function Register() {
       } catch (error: any) {
 
         alert(
-          error.response?.data?.message ||
+          error.response?.data
+            ?.message ||
           "Registration failed"
         );
       }
@@ -62,122 +75,141 @@ function Register() {
 
   return (
 
-    <div className="min-h-screen flex items-center justify-center bg-[#0f172a] px-4">
+    <div className={`min-h-screen flex items-center justify-center transition-all duration-500 ${
+      darkMode
+        ? "bg-[#020617]"
+        : "bg-gray-100"
+    }`}>
 
-      <div className="w-full max-w-md bg-[#111827] border border-gray-800 rounded-3xl p-8 shadow-2xl">
+      <button
+        onClick={() =>
+          setDarkMode(
+            !darkMode
+          )
+        }
+        className={`absolute top-6 right-6 p-3 rounded-full ${
+          darkMode
+            ? "bg-[#111827] text-white"
+            : "bg-white text-black"
+        }`}
+      >
 
-        <div className="mb-8 text-center">
+        {darkMode
+          ? <Sun />
+          : <Moon />}
 
-          <h1 className="text-4xl font-bold text-white mb-2">
+      </button>
+
+      <div className={`w-[420px] p-10 rounded-[35px] shadow-2xl border transition-all ${
+        darkMode
+          ? "bg-[#111827] border-gray-800 text-white"
+          : "bg-white border-gray-200 text-black"
+      }`}>
+
+        <div className="flex flex-col items-center mb-8">
+
+          <div className="bg-blue-600 p-5 rounded-3xl mb-5">
+
+            <UserPlus
+              size={40}
+            />
+
+          </div>
+
+          <h1 className="text-4xl font-bold">
 
             Create Account
 
           </h1>
 
-          <p className="text-gray-400">
+          <p className="text-gray-400 mt-2">
 
-            Start managing your tasks smarter
+            Join the platform
 
           </p>
 
         </div>
 
-        <div className="space-y-5">
+        <form
+          onSubmit={
+            handleRegister
+          }
+          className="space-y-5"
+        >
 
-          <div className="relative">
+          <input
+            type="text"
+            placeholder="Username"
+            value={username}
+            onChange={(e) =>
+              setUsername(
+                e.target.value
+              )
+            }
+            className={`w-full p-4 rounded-2xl outline-none ${
+              darkMode
+                ? "bg-[#1e293b]"
+                : "bg-gray-100"
+            }`}
+          />
 
-            <User
-              className="absolute left-4 top-4 text-gray-500"
-              size={20}
-            />
+          <input
+            type="email"
+            placeholder="Email"
+            value={email}
+            onChange={(e) =>
+              setEmail(
+                e.target.value
+              )
+            }
+            className={`w-full p-4 rounded-2xl outline-none ${
+              darkMode
+                ? "bg-[#1e293b]"
+                : "bg-gray-100"
+            }`}
+          />
 
-            <input
-              type="text"
-              placeholder="Username"
-              value={username}
-              onChange={(e) =>
-                setUsername(
-                  e.target.value
-                )
-              }
-              className="w-full bg-[#1f2937] text-white placeholder-gray-500 border border-gray-700 rounded-2xl py-4 pl-12 pr-4 outline-none focus:border-blue-500 transition"
-            />
-
-          </div>
-
-          <div className="relative">
-
-            <Mail
-              className="absolute left-4 top-4 text-gray-500"
-              size={20}
-            />
-
-            <input
-              type="email"
-              placeholder="Email"
-              value={email}
-              onChange={(e) =>
-                setEmail(
-                  e.target.value
-                )
-              }
-              className="w-full bg-[#1f2937] text-white placeholder-gray-500 border border-gray-700 rounded-2xl py-4 pl-12 pr-4 outline-none focus:border-blue-500 transition"
-            />
-
-          </div>
-
-          <div className="relative">
-
-            <Lock
-              className="absolute left-4 top-4 text-gray-500"
-              size={20}
-            />
-
-            <input
-              type="password"
-              placeholder="Password"
-              value={password}
-              onChange={(e) =>
-                setPassword(
-                  e.target.value
-                )
-              }
-              className="w-full bg-[#1f2937] text-white placeholder-gray-500 border border-gray-700 rounded-2xl py-4 pl-12 pr-4 outline-none focus:border-blue-500 transition"
-            />
-
-          </div>
+          <input
+            type="password"
+            placeholder="Password"
+            value={password}
+            onChange={(e) =>
+              setPassword(
+                e.target.value
+              )
+            }
+            className={`w-full p-4 rounded-2xl outline-none ${
+              darkMode
+                ? "bg-[#1e293b]"
+                : "bg-gray-100"
+            }`}
+          />
 
           <button
-            onClick={
-              handleRegister
-            }
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white py-4 rounded-2xl font-semibold transition-all"
+            type="submit"
+            className="w-full bg-blue-600 hover:bg-blue-700 transition-all p-4 rounded-2xl text-white font-bold"
           >
 
-            Create Account
+            Register
 
           </button>
 
-        </div>
+        </form>
 
-        <div className="mt-8 text-center">
+        <p className="text-center mt-6 text-gray-400">
 
-          <p className="text-gray-400">
+          Already have account?
 
-            Already have an account?
+          <Link
+            to="/"
+            className="text-blue-500 ml-2"
+          >
 
-            <Link
-              to="/"
-              className="text-blue-500 ml-2 hover:text-blue-400"
-            >
+            Login
 
-              Login
+          </Link>
 
-            </Link>
-
-          </p>
-
-        </div>
+        </p>
 
       </div>
 

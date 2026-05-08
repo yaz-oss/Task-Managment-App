@@ -1,36 +1,47 @@
+// Frontend/src/App.tsx
+
 import {
+  BrowserRouter,
   Routes,
   Route,
 } from "react-router-dom";
 
 import Login from "./pages/Login";
-
 import Register from "./pages/Register";
-
 import Dashboard from "./pages/Dashboard";
+import AdminDashboard from "./pages/AdminDashboard";
 
 function App() {
 
   return (
 
-    <Routes>
+    <BrowserRouter>
 
-      <Route
-        path="/"
-        element={<Login />}
-      />
+      <Routes>
 
-      <Route
-        path="/register"
-        element={<Register />}
-      />
+        <Route
+          path="/"
+          element={<Login />}
+        />
 
-      <Route
-        path="/dashboard"
-        element={<Dashboard />}
-      />
+        <Route
+          path="/register"
+          element={<Register />}
+        />
 
-    </Routes>
+        <Route
+          path="/dashboard"
+          element={<Dashboard />}
+        />
+
+        <Route
+          path="/admin"
+          element={<AdminDashboard />}
+        />
+
+      </Routes>
+
+    </BrowserRouter>
   );
 }
 

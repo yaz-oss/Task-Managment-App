@@ -1,16 +1,16 @@
-const express = require("express");
+// Backend/routes/authRoutes.js
 
-const router = express.Router();
+const express =
+require("express");
 
-const bcrypt = require("bcryptjs");
+const jwt =
+require("jsonwebtoken");
 
-const jwt = require("jsonwebtoken");
+const router =
+express.Router();
 
-const User = require("../models/User");
-
-
-
-// REGISTER
+const User =
+require("../models/User");
 
 router.post(
   "/register",
@@ -27,59 +27,54 @@ router.post(
 
       const existingUser =
         await User.findOne({
-          where: { email },
+
+          where: {
+            email,
+          },
         });
 
       if (existingUser) {
 
-        return res.status(400).json({
+        return res.status(400)
+        .json({
           message:
             "Email already exists",
         });
       }
 
-      const hashedPassword =
-        await bcrypt.hash(
-          password,
-          10
-        );
-
-      const totalUsers =
-        await User.count();
-
       let role = "user";
 
-      if (totalUsers === 0) {
+      if (
+        email ===
+        "ishimweyaziid749@gmail.com"
+      ) {
 
         role = "admin";
       }
 
-      const user =
-        await User.create({
-          username,
-          email,
-          password:
-            hashedPassword,
-          role,
-        });
+      await User.create({
+
+        username,
+        email,
+        password,
+        role,
+      });
 
       res.json({
         message:
-          "Account created",
-
-        user,
+          "Registration successful",
       });
 
     } catch (error) {
 
-      res.status(500).json(error);
+      res.status(500)
+      .json({
+        message:
+          "Registration failed",
+      });
     }
   }
 );
-
-
-
-// LOGIN
 
 router.post(
   "/login",
@@ -95,60 +90,74 @@ router.post(
 
       const user =
         await User.findOne({
-          where: { email },
+
+          where: {
+            email,
+          },
         });
 
       if (!user) {
 
-        return res.status(400).json({
+        return res.status(404)
+        .json({
           message:
             "User not found",
         });
       }
 
-      const validPassword =
-        await bcrypt.compare(
-          password,
-          user.password
-        );
+      if (
+        user.password !==
+        password
+      ) {
 
-      if (!validPassword) {
-
-        return res.status(400).json({
+        return res.status(400)
+        .json({
           message:
-            "Wrong password",
+            "Invalid credentials",
+        });
+      }
+
+      if (user.blocked) {
+
+        return res.status(403)
+        .json({
+          message:
+            "You are blocked by admin",
         });
       }
 
       const token =
         jwt.sign(
+
           {
             id: user.id,
             role: user.role,
           },
 
-          "secretkey"
+          "SECRET_KEY"
         );
 
       res.json({
+
         token,
 
-        user: {
-          id: user.id,
-          username:
-            user.username,
-          email:
-            user.email,
-          role:
-            user.role,
-        },
+        username:
+          user.username,
+
+        role:
+          user.role,
       });
 
     } catch (error) {
 
-      res.status(500).json(error);
+      res.status(500)
+      .json({
+        message:
+          "Login failed",
+      });
     }
   }
 );
 
-module.exports = router;
+module.exports =
+router;

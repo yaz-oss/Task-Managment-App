@@ -1,33 +1,76 @@
-const jwt = require("jsonwebtoken");
+// Backend/middleware/authMiddleware.js
 
-const authMiddleware = (
+const jwt =
+require("jsonwebtoken");
+
+const User =
+require("../models/User");
+
+const authMiddleware =
+async (
   req,
   res,
   next
 ) => {
-  const token =
-    req.headers.authorization;
-
-  if (!token) {
-    return res.status(401).json({
-      message: "No token",
-    });
-  }
 
   try {
-    const verified = jwt.verify(
-      token,
-      "secretkey"
-    );
 
-    req.user = verified;
+    const token =
+      req.header(
+        "Authorization"
+      );
+
+    if (!token) {
+
+      return res.status(401)
+      .json({
+        message:
+          "No token",
+      });
+    }
+
+    const verified =
+      jwt.verify(
+        token,
+        "SECRET_KEY"
+      );
+
+    const user =
+      await User.findByPk(
+        verified.id
+      );
+
+    if (!user) {
+
+      return res.status(404)
+      .json({
+        message:
+          "User not found",
+      });
+    }
+
+    if (user.blocked) {
+
+      return res.status(403)
+      .json({
+        message:
+          "Blocked by admin",
+      });
+    }
+
+    req.user = user;
 
     next();
+
   } catch (error) {
-    res.status(401).json({
-      message: "Invalid token",
+
+    res.status(401)
+    .json({
+      message:
+        "Unauthorized",
     });
   }
 };
 
-module.exports = authMiddleware;
+module.exports =
+authMiddleware;

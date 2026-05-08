@@ -1,24 +1,51 @@
-const { DataTypes } = require("sequelize");
-const sequelize = require("../config/db");
+// Backend/models/User.js
 
-const User = sequelize.define("User", {
-  username: {
-    type: DataTypes.STRING,
-  },
+const {
+  DataTypes,
+} = require("sequelize");
 
-  email: {
-    type: DataTypes.STRING,
-    unique: true,
-  },
+const sequelize =
+require("../config/db");
 
-  password: {
-    type: DataTypes.STRING,
-  },
+const User =
+sequelize.define(
+  "User",
 
-  role: {
-    type: DataTypes.STRING,
-    defaultValue: "user",
-  },
-});
+  {
+    username: {
+      type:
+        DataTypes.STRING,
+    },
 
-module.exports = User;
+    email: {
+      type:
+        DataTypes.STRING,
+
+      unique: true,
+    },
+
+    password: {
+      type:
+        DataTypes.STRING,
+    },
+
+    role: {
+      type:
+        DataTypes.STRING,
+
+      defaultValue:
+        "user",
+    },
+
+    blocked: {
+      type:
+        DataTypes.BOOLEAN,
+
+      defaultValue:
+        false,
+    },
+  }
+);
+
+module.exports =
+User;

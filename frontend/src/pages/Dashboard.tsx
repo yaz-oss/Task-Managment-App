@@ -4,16 +4,20 @@ import axios from "axios";
 
 import {
   LayoutDashboard,
-  CheckCircle2,
+  Plus,
   Trash2,
   Pencil,
-  LogOut,
+  Check,
   Moon,
   Sun,
-  Plus,
+  LogOut,
+  ClipboardList,
+  CheckCircle2,
 } from "lucide-react";
 
-type Task = {
+import { useNavigate } from "react-router-dom";
+
+type TaskType = {
   id: number;
   title: string;
   description: string;
@@ -22,10 +26,25 @@ type Task = {
 
 function Dashboard() {
 
-  const [tasks, setTasks] =
-    useState<Task[]>([]);
+  const navigate =
+    useNavigate();
 
-  const [title, setTitle] =
+  const username =
+    localStorage.getItem(
+      "username"
+    );
+
+  const token =
+    localStorage.getItem(
+      "token"
+    );
+
+  const [tasks,
+    setTasks] =
+    useState<TaskType[]>([]);
+
+  const [title,
+    setTitle] =
     useState("");
 
   const [description,
@@ -34,16 +53,13 @@ function Dashboard() {
 
   const [editingId,
     setEditingId] =
-    useState<number | null>(null);
+    useState<number | null>(
+      null
+    );
 
   const [darkMode,
     setDarkMode] =
     useState(true);
-
-  const token =
-    localStorage.getItem(
-      "token"
-    );
 
   const fetchTasks =
     async () => {
@@ -62,7 +78,9 @@ function Dashboard() {
             }
           );
 
-        setTasks(res.data);
+        setTasks(
+          res.data
+        );
 
       } catch (error) {
 
@@ -82,9 +100,7 @@ function Dashboard() {
       if (
         !title ||
         !description
-      ) {
-        return;
-      }
+      ) return;
 
       try {
 
@@ -105,7 +121,6 @@ function Dashboard() {
         );
 
         setTitle("");
-
         setDescription("");
 
         fetchTasks();
@@ -141,12 +156,12 @@ function Dashboard() {
     };
 
   const updateTask =
-    async () => {
+    async (id: number) => {
 
       try {
 
         await axios.put(
-          `http://localhost:5000/api/tasks/${editingId}`,
+          `http://localhost:5000/api/tasks/${id}`,
 
           {
             title,
@@ -164,7 +179,6 @@ function Dashboard() {
         setEditingId(null);
 
         setTitle("");
-
         setDescription("");
 
         fetchTasks();
@@ -175,15 +189,13 @@ function Dashboard() {
       }
     };
 
-  const logout = () => {
+  const logout =
+    () => {
 
-    localStorage.removeItem(
-      "token"
-    );
+      localStorage.clear();
 
-    window.location.href =
-      "/";
-  };
+      navigate("/");
+    };
 
   return (
 
@@ -195,38 +207,97 @@ function Dashboard() {
       }`}
     >
 
+      {/* SIDEBAR */}
+
       <div
-        className={`w-[260px] p-6 flex flex-col justify-between ${
+        className={`w-72 h-screen fixed left-0 top-0 border-r flex flex-col justify-between p-6 ${
           darkMode
-            ? "bg-[#111827]"
-            : "bg-white"
-        } shadow-2xl`}
+            ? "bg-[#111827] border-gray-800"
+            : "bg-white border-gray-300"
+        }`}
       >
 
         <div>
 
-          <div className="flex items-center gap-3 mb-12">
+          {/* LOGO */}
 
-            <LayoutDashboard
-              size={34}
-            />
+          <div className="mb-12">
 
-            <h1 className="text-2xl font-bold">
+            <h1 className="text-3xl font-bold">
 
               TaskFlow
 
             </h1>
 
+            <p className="text-gray-400 mt-2">
+
+              Productivity Dashboard
+
+            </p>
+
           </div>
+
+          {/* MENU */}
 
           <div className="space-y-4">
 
-            <div className="flex items-center gap-3 bg-blue-600 p-4 rounded-2xl cursor-pointer">
+            <div className="bg-blue-600 text-white p-4 rounded-2xl flex items-center gap-4">
 
-              <CheckCircle2 />
+              <LayoutDashboard />
 
-              <span>
-                Dashboard
+              Dashboard
+
+            </div>
+
+            <div
+              className={`p-4 rounded-2xl flex items-center justify-between ${
+                darkMode
+                  ? "bg-[#1f2937]"
+                  : "bg-gray-200"
+              }`}
+            >
+
+              <div className="flex items-center gap-4">
+
+                <ClipboardList />
+
+                Total Tasks
+
+              </div>
+
+              <span className="font-bold">
+
+                {tasks.length}
+
+              </span>
+
+            </div>
+
+            <div
+              className={`p-4 rounded-2xl flex items-center justify-between ${
+                darkMode
+                  ? "bg-[#1f2937]"
+                  : "bg-gray-200"
+              }`}
+            >
+
+              <div className="flex items-center gap-4">
+
+                <CheckCircle2 />
+
+                Completed
+
+              </div>
+
+              <span className="font-bold">
+
+                {
+                  tasks.filter(
+                    (task) =>
+                      task.completed
+                  ).length
+                }
+
               </span>
 
             </div>
@@ -234,6 +305,8 @@ function Dashboard() {
           </div>
 
         </div>
+
+        {/* BOTTOM */}
 
         <div className="space-y-4">
 
@@ -243,14 +316,16 @@ function Dashboard() {
                 !darkMode
               )
             }
-            className="w-full flex items-center justify-center gap-3 p-4 rounded-2xl bg-gray-700 hover:bg-gray-600 transition"
+            className={`w-full p-4 rounded-2xl flex items-center justify-center gap-3 ${
+              darkMode
+                ? "bg-[#1f2937]"
+                : "bg-gray-200"
+            }`}
           >
 
-            {darkMode ? (
-              <Sun />
-            ) : (
-              <Moon />
-            )}
+            {darkMode
+              ? <Sun />
+              : <Moon />}
 
             Theme
 
@@ -258,7 +333,7 @@ function Dashboard() {
 
           <button
             onClick={logout}
-            className="w-full flex items-center justify-center gap-3 p-4 rounded-2xl bg-red-600 hover:bg-red-700 transition"
+            className="w-full bg-red-600 hover:bg-red-700 transition p-4 rounded-2xl flex items-center justify-center gap-3 text-white"
           >
 
             <LogOut />
@@ -271,45 +346,49 @@ function Dashboard() {
 
       </div>
 
-      <div className="flex-1 p-10">
+      {/* MAIN */}
 
-        <div className="flex justify-between items-center mb-10">
+      <div className="ml-72 flex-1 p-8">
 
-          <div>
+        {/* TOP */}
 
-            <h1 className="text-4xl font-bold">
+        <div className="mb-10">
 
-              Welcome Back
+          <h1 className="text-5xl font-bold">
 
-            </h1>
+            Welcome,
+            {" "}
+            {username}
 
-            <p className="text-gray-400 mt-2">
+          </h1>
 
-              Manage your tasks beautifully
+          <p className="text-gray-400 mt-3">
 
-            </p>
+            Organize your work professionally
 
-          </div>
+          </p>
 
         </div>
 
+        {/* CREATE */}
+
         <div
-          className={`p-6 rounded-3xl mb-10 ${
+          className={`rounded-3xl p-6 mb-10 ${
             darkMode
               ? "bg-[#111827]"
               : "bg-white"
-          } shadow-xl`}
+          }`}
         >
 
           <h2 className="text-2xl font-bold mb-6">
 
             {editingId
-              ? "Update Task"
+              ? "Edit Task"
               : "Create Task"}
 
           </h2>
 
-          <div className="grid md:grid-cols-2 gap-5">
+          <div className="grid md:grid-cols-2 gap-4">
 
             <input
               type="text"
@@ -346,15 +425,20 @@ function Dashboard() {
           </div>
 
           <button
-            onClick={
+            onClick={() =>
+
               editingId
-                ? updateTask
-                : addTask
+                ? updateTask(
+                    editingId
+                  )
+                : addTask()
             }
-            className="mt-6 bg-blue-600 hover:bg-blue-700 px-6 py-4 rounded-2xl flex items-center gap-3 transition"
+            className="mt-6 bg-blue-600 hover:bg-blue-700 px-6 py-3 rounded-2xl flex items-center gap-2 text-white"
           >
 
-            <Plus />
+            {editingId
+              ? <Check />
+              : <Plus />}
 
             {editingId
               ? "Update Task"
@@ -364,42 +448,34 @@ function Dashboard() {
 
         </div>
 
+        {/* TASKS */}
+
         <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-6">
 
           {tasks.map((task) => (
 
             <div
               key={task.id}
-              className={`p-6 rounded-3xl shadow-xl ${
+              className={`rounded-3xl p-6 shadow-xl ${
                 darkMode
                   ? "bg-[#111827]"
                   : "bg-white"
               }`}
             >
 
-              <div className="flex justify-between items-start mb-5">
+              <h2 className="text-2xl font-bold mb-2">
 
-                <div>
+                {task.title}
 
-                  <h2 className="text-2xl font-bold">
+              </h2>
 
-                    {task.title}
+              <p className="text-gray-400 mb-6">
 
-                  </h2>
+                {task.description}
 
-                  <p className="text-gray-400 mt-2">
+              </p>
 
-                    {
-                      task.description
-                    }
-
-                  </p>
-
-                </div>
-
-              </div>
-
-              <div className="flex gap-4 mt-6">
+              <div className="flex gap-4">
 
                 <button
                   onClick={() => {
@@ -416,7 +492,7 @@ function Dashboard() {
                       task.description
                     );
                   }}
-                  className="flex-1 bg-yellow-500 hover:bg-yellow-600 py-3 rounded-2xl flex items-center justify-center gap-2 transition"
+                  className="bg-yellow-500 px-4 py-2 rounded-2xl flex items-center gap-2 text-white"
                 >
 
                   <Pencil size={18} />
@@ -431,7 +507,7 @@ function Dashboard() {
                       task.id
                     )
                   }
-                  className="flex-1 bg-red-600 hover:bg-red-700 py-3 rounded-2xl flex items-center justify-center gap-2 transition"
+                  className="bg-red-600 px-4 py-2 rounded-2xl flex items-center gap-2 text-white"
                 >
 
                   <Trash2 size={18} />
