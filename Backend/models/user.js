@@ -1,5 +1,3 @@
-// Backend/models/User.js
-
 const {
   DataTypes,
 } = require("sequelize");
@@ -8,44 +6,34 @@ const sequelize =
 require("../config/db");
 
 const User =
-sequelize.define(
-  "User",
+sequelize.define("User", {
 
-  {
-    username: {
-      type:
-        DataTypes.STRING,
-    },
+  username: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
 
-    email: {
-      type:
-        DataTypes.STRING,
+  email: {
+    type: DataTypes.STRING,
+    unique: true,
+    allowNull: false,
+  },
 
-      unique: true,
-    },
+  password: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
 
-    password: {
-      type:
-        DataTypes.STRING,
-    },
+  role: {
+    type: DataTypes.STRING,
+    defaultValue: "user",
+  },
 
-    role: {
-      type:
-        DataTypes.STRING,
+  blocked: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: false,
+  },
 
-      defaultValue:
-        "user",
-    },
+});
 
-    blocked: {
-      type:
-        DataTypes.BOOLEAN,
-
-      defaultValue:
-        false,
-    },
-  }
-);
-
-module.exports =
-User;
+module.exports = User;

@@ -1,13 +1,6 @@
-// Backend/middleware/authMiddleware.js
+const jwt = require("jsonwebtoken");
 
-const jwt =
-require("jsonwebtoken");
-
-const User =
-require("../models/User");
-
-const authMiddleware =
-async (
+module.exports = async (
   req,
   res,
   next
@@ -16,61 +9,30 @@ async (
   try {
 
     const token =
-      req.header(
-        "Authorization"
-      );
+    req.headers.authorization;
 
     if (!token) {
 
       return res.status(401)
       .json({
-        message:
-          "No token",
+        message: "No token",
       });
     }
 
-    const verified =
-      jwt.verify(
-        token,
-        "SECRET_KEY"
-      );
+    const decoded =
+    jwt.verify(
+      token,
+      "SECRETKEY"
+    );
 
-    const user =
-      await User.findByPk(
-        verified.id
-      );
-
-    if (!user) {
-
-      return res.status(404)
-      .json({
-        message:
-          "User not found",
-      });
-    }
-
-    if (user.blocked) {
-
-      return res.status(403)
-      .json({
-        message:
-          "Blocked by admin",
-      });
-    }
-
-    req.user = user;
+    req.user = decoded;
 
     next();
 
   } catch (error) {
 
-    res.status(401)
-    .json({
-      message:
-        "Unauthorized",
+    res.status(401).json({
+      message: "Invalid token",
     });
   }
 };
-
-module.exports =
-authMiddleware;

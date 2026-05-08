@@ -1,137 +1,37 @@
-// Backend/routes/adminRoutes.js
+const express =
+require("express");
 
-const express = require("express");
+const router =
+express.Router();
 
-const router = express.Router();
+const {
+  getUsers,
+  deleteUser,
+  blockUser,
+} = require(
+  "../controllers/adminController"
+);
 
-const User = require("../models/User");
-
-const Task = require("../models/Task");
-
-const authMiddleware = require("../middleware/authMiddleware");
+const authMiddleware =
+require("../middleware/authMiddleware");
 
 router.get(
   "/users",
-
   authMiddleware,
-
-  async (req, res) => {
-
-    try {
-
-      const users =
-        await User.findAll();
-
-      res.json(users);
-
-    } catch (error) {
-
-      res.status(500).json({
-        message:
-          "Failed to fetch users",
-      });
-    }
-  }
-);
-
-router.get(
-  "/tasks",
-
-  authMiddleware,
-
-  async (req, res) => {
-
-    try {
-
-      const tasks =
-        await Task.findAll();
-
-      res.json(tasks);
-
-    } catch (error) {
-
-      res.status(500).json({
-        message:
-          "Failed to fetch tasks",
-      });
-    }
-  }
+  getUsers
 );
 
 router.delete(
   "/user/:id",
-
   authMiddleware,
-
-  async (req, res) => {
-
-    try {
-
-      await User.destroy({
-
-        where: {
-          id:
-            req.params.id,
-        },
-      });
-
-      res.json({
-        message:
-          "User deleted",
-      });
-
-    } catch (error) {
-
-      res.status(500).json({
-        message:
-          "Delete failed",
-      });
-    }
-  }
+  deleteUser
 );
 
 router.put(
-  "/block/:id",
-
+  "/user/:id/block",
   authMiddleware,
-
-  async (req, res) => {
-
-    try {
-
-      const user =
-        await User.findByPk(
-          req.params.id
-        );
-
-      if (!user) {
-
-        return res.status(404)
-        .json({
-          message:
-            "User not found",
-        });
-      }
-
-      user.blocked =
-        !user.blocked;
-
-      await user.save();
-
-      res.json({
-        message:
-          "User updated",
-      });
-
-    } catch (error) {
-
-      res.status(500)
-      .json({
-        message:
-          "Block failed",
-      });
-    }
-  }
+  blockUser
 );
 
-module.exports = router;
+module.exports =
+router;

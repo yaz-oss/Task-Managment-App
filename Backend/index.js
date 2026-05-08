@@ -42,7 +42,7 @@ app.use(
   adminRoutes
 );
 
-sequelize.sync()
+sequelize.sync({ alter: true })
 .then(() => {
 
   app.listen(
