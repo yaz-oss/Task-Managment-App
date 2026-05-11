@@ -1,4 +1,3 @@
-// Frontend/src/pages/Register.tsx
 
 import {
   useState,
