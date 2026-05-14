@@ -47,18 +47,23 @@ const GoogleSuccess = () => {
         );
       }
 
-      if (role === "admin") {
-
-        navigate("/admin");
-      }
-
-      else {
-
-        navigate("/dashboard");
-      }
+      navigate(
+        role === "admin"
+          ? "/admin"
+          : "/dashboard",
+        { replace: true }
+      );
     }
 
-  }, []);
+    else {
+
+      navigate(
+        "/",
+        { replace: true }
+      );
+    }
+
+  }, [navigate]);
 
   return <div>Logging in...</div>;
 };

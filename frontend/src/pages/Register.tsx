@@ -61,11 +61,16 @@ function Register() {
 
         navigate("/");
 
-      } catch (error: any) {
+      } catch (error: unknown) {
+
+        const message =
+          axios.isAxiosError(error)
+            ? (error.response?.data as { message?: string } | undefined)
+                ?.message
+            : undefined;
 
         alert(
-          error.response?.data
-            ?.message ||
+          message ||
           "Registration failed"
         );
       }

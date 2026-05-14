@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import axios from "axios";
 
@@ -67,7 +67,7 @@ function Dashboard() {
     useState(true);
 
   const fetchTasks =
-    async () => {
+    useCallback(async () => {
 
       try {
 
@@ -102,7 +102,7 @@ function Dashboard() {
           error
         );
       }
-    };
+    }, [token]);
 
   useEffect(() => {
 
@@ -112,9 +112,20 @@ function Dashboard() {
       return;
     }
 
-    fetchTasks();
+    const loadTasks =
+      window.setTimeout(
+        () => {
+          void fetchTasks();
+        },
+        0
+      );
 
-  }, []);
+    return () =>
+      window.clearTimeout(
+        loadTasks
+      );
+
+  }, [fetchTasks, navigate, token]);
 
   const addTask =
     async () => {
@@ -145,7 +156,7 @@ function Dashboard() {
         setTitle("");
         setDescription("");
 
-        fetchTasks();
+        void fetchTasks();
 
       } catch (error) {
 
@@ -174,7 +185,7 @@ function Dashboard() {
           }
         );
 
-        fetchTasks();
+        void fetchTasks();
 
       } catch (error) {
 
@@ -215,7 +226,7 @@ function Dashboard() {
         setTitle("");
         setDescription("");
 
-        fetchTasks();
+        void fetchTasks();
 
       } catch (error) {
 
@@ -250,7 +261,7 @@ function Dashboard() {
           }
         );
 
-        fetchTasks();
+        void fetchTasks();
 
       } catch (error) {
 
@@ -565,8 +576,8 @@ function Dashboard() {
                   <span
                     className={
                       task.completed
-                        ? "text-green-400"
-                        : "text-yellow-400"
+                        ? "text-blue-300"
+                        : "text-violet-300"
                     }
                   >
 
@@ -595,7 +606,7 @@ function Dashboard() {
                         task.description
                       );
                     }}
-                    className="bg-yellow-500 px-4 py-2 rounded-2xl flex items-center gap-2 text-white"
+                    className="bg-slate-600 hover:bg-slate-700 px-4 py-2 rounded-2xl flex items-center gap-2 text-white"
                   >
 
                     <Pencil size={18} />
@@ -610,7 +621,7 @@ function Dashboard() {
                         task
                       )
                     }
-                    className="bg-green-600 px-4 py-2 rounded-2xl flex items-center gap-2 text-white"
+                    className="bg-indigo-600 hover:bg-indigo-700 px-4 py-2 rounded-2xl flex items-center gap-2 text-white"
                   >
 
                     <Check size={18} />

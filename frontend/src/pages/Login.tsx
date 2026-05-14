@@ -65,6 +65,14 @@ function Login() {
           response.data.role
         );
 
+        if (response.data.username) {
+
+          localStorage.setItem(
+            "username",
+            response.data.username
+          );
+        }
+
         alert(
           "Login successful"
         );
@@ -85,11 +93,16 @@ function Login() {
           );
         }
 
-      } catch (error: any) {
+      } catch (error: unknown) {
+
+        const message =
+          axios.isAxiosError(error)
+            ? (error.response?.data as { message?: string } | undefined)
+                ?.message
+            : undefined;
 
         alert(
-          error.response?.data
-            ?.message ||
+          message ||
           "Login failed"
         );
       }

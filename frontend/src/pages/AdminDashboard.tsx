@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
@@ -72,19 +72,12 @@ const AdminDashboard = () => {
   const [assignMessage, setAssignMessage] =
   useState("");
 
-  useEffect(() => {
+  const fetchUsers = useCallback(async () => {
 
     if (!token) {
 
-      navigate("/login");
       return;
     }
-
-    fetchUsers();
-
-  }, []);
-
-  const fetchUsers = async () => {
 
     try {
 
@@ -93,7 +86,7 @@ const AdminDashboard = () => {
         "http://localhost:5000/api/admin/users",
         {
           headers: {
-            Authorization: token,
+            Authorization: `Bearer ${token}`,
           },
         }
       );
@@ -104,7 +97,30 @@ const AdminDashboard = () => {
 
       console.log(error);
     }
-  };
+  }, [token]);
+
+  useEffect(() => {
+
+    if (!token) {
+
+      navigate("/");
+      return;
+    }
+
+    const loadUsers =
+      window.setTimeout(
+        () => {
+          void fetchUsers();
+        },
+        0
+      );
+
+    return () =>
+      window.clearTimeout(
+        loadUsers
+      );
+
+  }, [fetchUsers, navigate, token]);
 
   const deleteUser = async (
     id: number
@@ -116,12 +132,12 @@ const AdminDashboard = () => {
         `http://localhost:5000/api/admin/user/${id}`,
         {
           headers: {
-            Authorization: token,
+            Authorization: `Bearer ${token}`,
           },
         }
       );
 
-      fetchUsers();
+      void fetchUsers();
 
     } catch (error) {
 
@@ -140,12 +156,12 @@ const AdminDashboard = () => {
         {},
         {
           headers: {
-            Authorization: token,
+            Authorization: `Bearer ${token}`,
           },
         }
       );
 
-      fetchUsers();
+      void fetchUsers();
 
     } catch (error) {
 
@@ -178,7 +194,7 @@ const AdminDashboard = () => {
         },
         {
           headers: {
-            Authorization: token,
+            Authorization: `Bearer ${token}`,
           },
         }
       );
@@ -190,12 +206,18 @@ const AdminDashboard = () => {
         "Task assigned"
       );
 
-      fetchUsers();
+      void fetchUsers();
 
-    } catch (error: any) {
+    } catch (error: unknown) {
+
+      const message =
+        axios.isAxiosError(error)
+          ? (error.response?.data as { message?: string } | undefined)
+              ?.message
+          : undefined;
 
       setAssignMessage(
-        error.response?.data?.message ||
+        message ||
         "Could not assign task"
       );
     }
@@ -203,7 +225,7 @@ const AdminDashboard = () => {
 
   const logout = () => {
 
-    localStorage.removeItem("token");
+    localStorage.clear();
 
     navigate("/");
   };
@@ -373,7 +395,7 @@ const AdminDashboard = () => {
 
               </div>
 
-              <div className="bg-gradient-to-br from-green-600 to-emerald-700 p-8 rounded-[30px] shadow-2xl relative overflow-hidden">
+              <div className="bg-gradient-to-br from-sky-600 to-blue-700 p-8 rounded-[30px] shadow-2xl relative overflow-hidden">
 
                 <div className="absolute right-5 top-5 opacity-20">
                   <CheckCircle2 size={90} />
@@ -389,7 +411,7 @@ const AdminDashboard = () => {
 
               </div>
 
-              <div className="bg-gradient-to-br from-orange-500 to-red-600 p-8 rounded-[30px] shadow-2xl relative overflow-hidden">
+              <div className="bg-gradient-to-br from-violet-600 to-fuchsia-700 p-8 rounded-[30px] shadow-2xl relative overflow-hidden">
 
                 <div className="absolute right-5 top-5 opacity-20">
                   <Activity size={90} />
@@ -497,8 +519,8 @@ const AdminDashboard = () => {
                         }
                         className={
                           user.blocked
-                          ? "bg-green-600 hover:bg-green-700 px-5 py-3 rounded-2xl flex items-center gap-2 transition"
-                          : "bg-yellow-600 hover:bg-yellow-700 px-5 py-3 rounded-2xl flex items-center gap-2 transition"
+                          ? "bg-blue-600 hover:bg-blue-700 px-5 py-3 rounded-2xl flex items-center gap-2 transition"
+                          : "bg-violet-600 hover:bg-violet-700 px-5 py-3 rounded-2xl flex items-center gap-2 transition"
                         }
                       >
 
@@ -691,8 +713,8 @@ const AdminDashboard = () => {
                     <div
                       className={
                         task.completed
-                        ? "bg-green-600 px-4 py-2 rounded-xl text-sm"
-                        : "bg-yellow-600 px-4 py-2 rounded-xl text-sm"
+                        ? "bg-blue-600 px-4 py-2 rounded-xl text-sm"
+                        : "bg-violet-600 px-4 py-2 rounded-xl text-sm"
                       }
                     >
 
