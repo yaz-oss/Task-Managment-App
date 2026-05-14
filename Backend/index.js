@@ -1,3 +1,5 @@
+require("dotenv").config();
+
 const express =
 require("express");
 
@@ -6,6 +8,17 @@ require("cors");
 
 const sequelize =
 require("./config/db");
+
+const passport =
+require("passport");
+
+require("./config/passport");
+
+const User =
+require("./models/user");
+
+const Task =
+require("./models/task");
 
 const authRoutes =
 require("./routes/authRoutes");
@@ -16,16 +29,44 @@ require("./routes/taskRoutes");
 const adminRoutes =
 require("./routes/adminRoutes");
 
-require("./models/User");
+const userRoutes =
+require("./routes/userRoutes");
 
-require("./models/Task");
+
+// RELATIONS
+
+User.hasMany(Task);
+
+Task.belongsTo(User);
+
 
 const app =
 express();
 
-app.use(cors());
 
-app.use(express.json());
+// MIDDLEWARE
+
+app.use(
+  cors({
+
+    origin:
+      "http://localhost:5173",
+
+    credentials:
+      true,
+  })
+);
+
+app.use(
+  express.json()
+);
+
+app.use(
+  passport.initialize()
+);
+
+
+// ROUTES
 
 app.use(
   "/api/auth",
@@ -42,7 +83,18 @@ app.use(
   adminRoutes
 );
 
-sequelize.sync({ alter: true })
+app.use(
+  "/api/users",
+  userRoutes
+);
+
+
+// SERVER
+
+sequelize.sync({
+  alter: true,
+})
+
 .then(() => {
 
   app.listen(
@@ -55,4 +107,9 @@ sequelize.sync({ alter: true })
       );
     }
   );
+})
+
+.catch((error) => {
+
+  console.log(error);
 });

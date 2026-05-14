@@ -13,6 +13,7 @@ import {
   LogOut,
   ClipboardList,
   CheckCircle2,
+  ShieldCheck,
 } from "lucide-react";
 
 import { useNavigate } from "react-router-dom";
@@ -22,6 +23,10 @@ type TaskType = {
   title: string;
   description: string;
   completed: boolean;
+  UserId?: number;
+  assignedTo?: number;
+  assignedBy?: number;
+  assignedByAdmin?: boolean;
 };
 
 function Dashboard() {
@@ -69,26 +74,43 @@ function Dashboard() {
         const res =
           await axios.get(
             "http://localhost:5000/api/tasks",
-
             {
               headers: {
                 Authorization:
-                  token,
+                  `Bearer ${token}`,
               },
             }
           );
 
-        setTasks(
+        console.log(
+          "TASKS:",
           res.data
+        );
+
+        setTasks(
+          Array.isArray(
+            res.data
+          )
+            ? res.data
+            : []
         );
 
       } catch (error) {
 
-        console.log(error);
+        console.log(
+          "FETCH ERROR:",
+          error
+        );
       }
     };
 
   useEffect(() => {
+
+    if (!token) {
+
+      navigate("/");
+      return;
+    }
 
     fetchTasks();
 
@@ -115,7 +137,7 @@ function Dashboard() {
           {
             headers: {
               Authorization:
-                token,
+                `Bearer ${token}`,
             },
           }
         );
@@ -127,12 +149,17 @@ function Dashboard() {
 
       } catch (error) {
 
-        console.log(error);
+        console.log(
+          "ADD ERROR:",
+          error
+        );
       }
     };
 
   const deleteTask =
-    async (id: number) => {
+    async (
+      id: number
+    ) => {
 
       try {
 
@@ -142,7 +169,7 @@ function Dashboard() {
           {
             headers: {
               Authorization:
-                token,
+                `Bearer ${token}`,
             },
           }
         );
@@ -151,12 +178,17 @@ function Dashboard() {
 
       } catch (error) {
 
-        console.log(error);
+        console.log(
+          "DELETE ERROR:",
+          error
+        );
       }
     };
 
   const updateTask =
-    async (id: number) => {
+    async (
+      id: number
+    ) => {
 
       try {
 
@@ -171,12 +203,14 @@ function Dashboard() {
           {
             headers: {
               Authorization:
-                token,
+                `Bearer ${token}`,
             },
           }
         );
 
-        setEditingId(null);
+        setEditingId(
+          null
+        );
 
         setTitle("");
         setDescription("");
@@ -185,7 +219,45 @@ function Dashboard() {
 
       } catch (error) {
 
-        console.log(error);
+        console.log(
+          "UPDATE ERROR:",
+          error
+        );
+      }
+    };
+
+  const completeTask =
+    async (
+      task: TaskType
+    ) => {
+
+      try {
+
+        await axios.put(
+          `http://localhost:5000/api/tasks/${task.id}`,
+
+          {
+            ...task,
+            completed:
+              !task.completed,
+          },
+
+          {
+            headers: {
+              Authorization:
+                `Bearer ${token}`,
+            },
+          }
+        );
+
+        fetchTasks();
+
+      } catch (error) {
+
+        console.log(
+          "COMPLETE ERROR:",
+          error
+        );
       }
     };
 
@@ -219,8 +291,6 @@ function Dashboard() {
 
         <div>
 
-          {/* LOGO */}
-
           <div className="mb-12">
 
             <h1 className="text-3xl font-bold">
@@ -236,8 +306,6 @@ function Dashboard() {
             </p>
 
           </div>
-
-          {/* MENU */}
 
           <div className="space-y-4">
 
@@ -293,7 +361,9 @@ function Dashboard() {
 
                 {
                   tasks.filter(
-                    (task) =>
+                    (
+                      task
+                    ) =>
                       task.completed
                   ).length
                 }
@@ -305,8 +375,6 @@ function Dashboard() {
           </div>
 
         </div>
-
-        {/* BOTTOM */}
 
         <div className="space-y-4">
 
@@ -350,27 +418,17 @@ function Dashboard() {
 
       <div className="ml-72 flex-1 p-8">
 
-        {/* TOP */}
-
         <div className="mb-10">
 
           <h1 className="text-5xl font-bold">
 
-            Welcome,
-            {" "}
-            {username}
+            Welcome, {username}
 
           </h1>
 
-          <p className="text-gray-400 mt-3">
-
-            Organize your work professionally
-
-          </p>
-
         </div>
 
-        {/* CREATE */}
+        {/* CREATE TASK */}
 
         <div
           className={`rounded-3xl p-6 mb-10 ${
@@ -450,76 +508,137 @@ function Dashboard() {
 
         {/* TASKS */}
 
-        <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-6">
+        {
+          tasks.length === 0 && (
 
-          {tasks.map((task) => (
+            <div className="text-center text-gray-400 text-xl mt-20">
 
-            <div
-              key={task.id}
-              className={`rounded-3xl p-6 shadow-xl ${
-                darkMode
-                  ? "bg-[#111827]"
-                  : "bg-white"
-              }`}
-            >
-
-              <h2 className="text-2xl font-bold mb-2">
-
-                {task.title}
-
-              </h2>
-
-              <p className="text-gray-400 mb-6">
-
-                {task.description}
-
-              </p>
-
-              <div className="flex gap-4">
-
-                <button
-                  onClick={() => {
-
-                    setEditingId(
-                      task.id
-                    );
-
-                    setTitle(
-                      task.title
-                    );
-
-                    setDescription(
-                      task.description
-                    );
-                  }}
-                  className="bg-yellow-500 px-4 py-2 rounded-2xl flex items-center gap-2 text-white"
-                >
-
-                  <Pencil size={18} />
-
-                  Edit
-
-                </button>
-
-                <button
-                  onClick={() =>
-                    deleteTask(
-                      task.id
-                    )
-                  }
-                  className="bg-red-600 px-4 py-2 rounded-2xl flex items-center gap-2 text-white"
-                >
-
-                  <Trash2 size={18} />
-
-                  Delete
-
-                </button>
-
-              </div>
+              No tasks found
 
             </div>
-          ))}
+          )
+        }
+
+        <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-6">
+
+          {tasks.map(
+            (task) => (
+
+              <div
+                key={task.id}
+                className={`rounded-3xl p-6 shadow-xl ${
+                  darkMode
+                    ? "bg-[#111827]"
+                    : "bg-white"
+                }`}
+              >
+
+                <h2 className="text-2xl font-bold mb-2">
+
+                  {task.title}
+
+                </h2>
+
+                <p className="text-gray-400 mb-4">
+
+                  {task.description}
+
+                </p>
+
+                {task.assignedByAdmin && (
+
+                  <div className="inline-flex items-center gap-2 bg-blue-600/15 text-blue-300 border border-blue-500/30 px-3 py-2 rounded-xl mb-4 text-sm font-semibold">
+
+                    <ShieldCheck size={16} />
+
+                    From Admin
+
+                  </div>
+
+                )}
+
+                <p className="mb-4">
+
+                  Status:
+                  {" "}
+
+                  <span
+                    className={
+                      task.completed
+                        ? "text-green-400"
+                        : "text-yellow-400"
+                    }
+                  >
+
+                    {task.completed
+                      ? "Completed"
+                      : "Pending"}
+
+                  </span>
+
+                </p>
+
+                <div className="flex flex-wrap gap-3">
+
+                  <button
+                    onClick={() => {
+
+                      setEditingId(
+                        task.id
+                      );
+
+                      setTitle(
+                        task.title
+                      );
+
+                      setDescription(
+                        task.description
+                      );
+                    }}
+                    className="bg-yellow-500 px-4 py-2 rounded-2xl flex items-center gap-2 text-white"
+                  >
+
+                    <Pencil size={18} />
+
+                    Edit
+
+                  </button>
+
+                  <button
+                    onClick={() =>
+                      completeTask(
+                        task
+                      )
+                    }
+                    className="bg-green-600 px-4 py-2 rounded-2xl flex items-center gap-2 text-white"
+                  >
+
+                    <Check size={18} />
+
+                    Done
+
+                  </button>
+
+                  <button
+                    onClick={() =>
+                      deleteTask(
+                        task.id
+                      )
+                    }
+                    className="bg-red-600 px-4 py-2 rounded-2xl flex items-center gap-2 text-white"
+                  >
+
+                    <Trash2 size={18} />
+
+                    Delete
+
+                  </button>
+
+                </div>
+
+              </div>
+            )
+          )}
 
         </div>
 

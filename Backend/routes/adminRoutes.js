@@ -8,6 +8,7 @@ const {
   getUsers,
   deleteUser,
   blockUser,
+  assignTaskToUser,
 } = require(
   "../controllers/adminController"
 );
@@ -31,6 +32,12 @@ router.put(
   "/user/:id/block",
   authMiddleware,
   blockUser
+);
+
+router.post(
+  "/task/assign",
+  authMiddleware,
+  assignTaskToUser
 );
 
 module.exports =

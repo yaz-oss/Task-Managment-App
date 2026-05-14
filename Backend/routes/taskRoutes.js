@@ -1,16 +1,20 @@
-const express = require("express");
+const express =
+require("express");
 
-const router = express.Router();
+const router =
+express.Router();
+
+const authMiddleware =
+require("../middleware/authMiddleware");
 
 const {
   getTasks,
   createTask,
   updateTask,
   deleteTask,
-} = require("../controllers/taskController");
-
-const authMiddleware =
-require("../middleware/authMiddleware");
+} = require(
+  "../controllers/taskController"
+);
 
 router.get(
   "/",
@@ -36,4 +40,5 @@ router.delete(
   deleteTask
 );
 
-module.exports = router;
+module.exports =
+router;

@@ -8,6 +8,7 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
 import AdminDashboard from "./pages/AdminDashboard";
+import GoogleSuccess from "./pages/GoogleSuccess";
 
 function App() {
 
@@ -37,8 +38,15 @@ function App() {
           element={<AdminDashboard />}
         />
 
-      </Routes>
+      
 
+      <Route
+        path="/google-success"
+        element={<GoogleSuccess />}
+      />
+
+      </Routes>
+      
     </BrowserRouter>
   );
 }

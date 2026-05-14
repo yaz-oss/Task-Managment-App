@@ -16,6 +16,8 @@ import {
   Activity,
   CheckCircle2,
   Clock3,
+  Send,
+  ShieldCheck,
 } from "lucide-react";
 
 interface Task {
@@ -25,6 +27,9 @@ interface Task {
   completed: boolean;
   createdAt: string;
   UserId: number;
+  assignedTo?: number;
+  assignedBy?: number;
+  assignedByAdmin?: boolean;
 }
 
 interface User {
@@ -54,6 +59,18 @@ const AdminDashboard = () => {
 
   const [activePage, setActivePage] =
   useState("dashboard");
+
+  const [assignedUserId, setAssignedUserId] =
+  useState("");
+
+  const [assignTitle, setAssignTitle] =
+  useState("");
+
+  const [assignDescription, setAssignDescription] =
+  useState("");
+
+  const [assignMessage, setAssignMessage] =
+  useState("");
 
   useEffect(() => {
 
@@ -133,6 +150,54 @@ const AdminDashboard = () => {
     } catch (error) {
 
       console.log(error);
+    }
+  };
+
+  const assignTask = async () => {
+
+    if (
+      !assignedUserId ||
+      !assignTitle ||
+      !assignDescription
+    ) {
+
+      setAssignMessage(
+        "Select a user and enter task details"
+      );
+      return;
+    }
+
+    try {
+
+      await axios.post(
+        "http://localhost:5000/api/admin/task/assign",
+        {
+          userId: Number(assignedUserId),
+          title: assignTitle,
+          description: assignDescription,
+        },
+        {
+          headers: {
+            Authorization: token,
+          },
+        }
+      );
+
+      setAssignedUserId("");
+      setAssignTitle("");
+      setAssignDescription("");
+      setAssignMessage(
+        "Task assigned"
+      );
+
+      fetchUsers();
+
+    } catch (error: any) {
+
+      setAssignMessage(
+        error.response?.data?.message ||
+        "Could not assign task"
+      );
     }
   };
 
@@ -484,6 +549,106 @@ const AdminDashboard = () => {
               Tasks
             </h1>
 
+            <div
+              className={
+                darkMode
+                ? "bg-[#111111] border border-gray-800 rounded-[30px] p-7 mb-8"
+                : "bg-white rounded-[30px] p-7 mb-8 shadow-lg"
+              }
+            >
+
+              <div className="flex items-center gap-3 mb-6">
+
+                <Send />
+
+                <h2 className="text-2xl font-bold">
+                  Assign Task
+                </h2>
+
+              </div>
+
+              <div className="grid lg:grid-cols-[1fr_1fr_1fr_auto] gap-4">
+
+                <select
+                  value={assignedUserId}
+                  onChange={(e) =>
+                    setAssignedUserId(e.target.value)
+                  }
+                  className={
+                    darkMode
+                    ? "bg-[#1a1a1a] border border-gray-700 rounded-2xl p-4 outline-none"
+                    : "bg-gray-100 border border-gray-200 rounded-2xl p-4 outline-none"
+                  }
+                >
+
+                  <option value="">
+                    Select user
+                  </option>
+
+                  {normalUsers.map((user) => (
+
+                    <option
+                      key={user.id}
+                      value={user.id}
+                    >
+                      {user.username}
+                    </option>
+
+                  ))}
+
+                </select>
+
+                <input
+                  type="text"
+                  placeholder="Task title"
+                  value={assignTitle}
+                  onChange={(e) =>
+                    setAssignTitle(e.target.value)
+                  }
+                  className={
+                    darkMode
+                    ? "bg-[#1a1a1a] border border-gray-700 rounded-2xl p-4 outline-none"
+                    : "bg-gray-100 border border-gray-200 rounded-2xl p-4 outline-none"
+                  }
+                />
+
+                <input
+                  type="text"
+                  placeholder="Task description"
+                  value={assignDescription}
+                  onChange={(e) =>
+                    setAssignDescription(e.target.value)
+                  }
+                  className={
+                    darkMode
+                    ? "bg-[#1a1a1a] border border-gray-700 rounded-2xl p-4 outline-none"
+                    : "bg-gray-100 border border-gray-200 rounded-2xl p-4 outline-none"
+                  }
+                />
+
+                <button
+                  onClick={assignTask}
+                  className="bg-blue-600 hover:bg-blue-700 px-6 py-4 rounded-2xl flex items-center justify-center gap-2 transition"
+                >
+
+                  <Send size={18} />
+
+                  Assign
+
+                </button>
+
+              </div>
+
+              {assignMessage && (
+
+                <p className="mt-4 text-sm opacity-70">
+                  {assignMessage}
+                </p>
+
+              )}
+
+            </div>
+
             <div className="grid md:grid-cols-2 gap-6">
 
               {allTasks.map((task) => (
@@ -508,6 +673,18 @@ const AdminDashboard = () => {
                       <p className="opacity-70 leading-relaxed">
                         {task.description}
                       </p>
+
+                      {task.assignedByAdmin && (
+
+                        <div className="inline-flex items-center gap-2 bg-blue-600/15 text-blue-300 border border-blue-500/30 px-3 py-2 rounded-xl mt-4 text-sm font-semibold">
+
+                          <ShieldCheck size={16} />
+
+                          Assigned by Admin
+
+                        </div>
+
+                      )}
 
                     </div>
 
@@ -550,7 +727,11 @@ const AdminDashboard = () => {
                         </p>
 
                         <p className="text-sm opacity-60">
-                          Task Creator
+                          {
+                            task.assignedByAdmin
+                            ? "Assigned User"
+                            : "Task Creator"
+                          }
                         </p>
 
                       </div>

@@ -1,5 +1,5 @@
 const User =
-require("../models/User");
+require("../models/user");
 
 const bcrypt =
 require("bcryptjs");
@@ -132,7 +132,7 @@ async (req, res) => {
         role: user.role,
       },
 
-      "SECRETKEY",
+      process.env.JWT_SECRET,
 
       {
         expiresIn: "7d",

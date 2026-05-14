@@ -1,107 +1,253 @@
-const Task = require("../models/Task");
+const Task =
+require("../models/task");
 
-const User = require("../models/User");
+const User =
+require("../models/user");
 
-const getTasks = async (req, res) => {
+const getTasks =
+async (req, res) => {
+
   try {
-    const tasks = await Task.findAll({
-      where: {
-        UserId: req.user.id,
-      },
-    });
+
+    const tasks =
+      await Task.findAll({
+
+        where: {
+          UserId:
+            req.user.id,
+        },
+
+        include: [
+          {
+            model: User,
+            attributes: [
+              "id",
+              "username",
+              "email",
+            ],
+          },
+        ],
+      });
 
     res.json(tasks);
+
   } catch (error) {
-    res.status(500).json(error);
-  }
-};
 
-const createTask = async (
-  req,
-  res
-) => {
-  try {
-    const task = await Task.create({
-      title: req.body.title,
-      description:
-        req.body.description,
+    console.log(error);
 
-      UserId: req.user.id,
+    res.status(500).json({
+      message:
+        "Server error",
     });
-
-    res.json(task);
-  } catch (error) {
-    res.status(500).json(error);
   }
 };
 
-const updateTask = async (
-  req,
-  res
-) => {
+const createTask =
+async (req, res) => {
+
   try {
-    const task = await Task.findByPk(
-      req.params.id
-    );
+
+    const task =
+      await Task.create({
+
+        title:
+          req.body.title,
+
+        description:
+          req.body.description,
+
+        completed:
+          false,
+
+        assignedTo:
+          req.user.id,
+
+        assignedBy:
+          req.user.id,
+
+        assignedByAdmin:
+          false,
+
+        UserId:
+          req.user.id,
+      });
+
+    const newTask =
+      await Task.findByPk(
+        task.id,
+        {
+          include: User,
+        }
+      );
+
+    res.json(newTask);
+
+  } catch (error) {
+
+    console.log(error);
+
+    res.status(500).json({
+      message:
+        "Server error",
+    });
+  }
+};
+
+const updateTask =
+async (req, res) => {
+
+  try {
+
+    const task =
+      await Task.findOne({
+
+        where: {
+          id:
+            req.params.id,
+
+          UserId:
+            req.user.id,
+        },
+      });
 
     if (!task) {
-      return res.status(404).json({
-        message: "Task not found",
+
+      return res.status(404)
+      .json({
+        message:
+          "Task not found",
       });
     }
 
-    await task.update(req.body);
+    const updates = {};
 
-    res.json(task);
+    if (req.body.title !== undefined) {
+      updates.title =
+        req.body.title;
+    }
+
+    if (req.body.description !== undefined) {
+      updates.description =
+        req.body.description;
+    }
+
+    if (req.body.completed !== undefined) {
+      updates.completed =
+        req.body.completed;
+    }
+
+    await task.update(updates);
+
+    const updatedTask =
+      await Task.findByPk(
+        task.id,
+        {
+          include: User,
+        }
+      );
+
+    res.json(
+      updatedTask
+    );
+
   } catch (error) {
-    res.status(500).json(error);
+
+    console.log(error);
+
+    res.status(500).json({
+      message:
+        "Server error",
+    });
   }
 };
 
-const deleteTask = async (
-  req,
-  res
-) => {
+const deleteTask =
+async (req, res) => {
+
   try {
-    const task = await Task.findByPk(
-      req.params.id
-    );
+
+    const task =
+      await Task.findOne({
+
+        where: {
+          id:
+            req.params.id,
+
+          UserId:
+            req.user.id,
+        },
+      });
 
     if (!task) {
-      return res.status(404).json({
-        message: "Task not found",
+
+      return res.status(404)
+      .json({
+        message:
+          "Task not found",
       });
     }
 
     await task.destroy();
 
     res.json({
-      message: "Task deleted",
+      message:
+        "Task deleted",
     });
+
   } catch (error) {
-    res.status(500).json(error);
+
+    console.log(error);
+
+    res.status(500).json({
+      message:
+        "Server error",
+    });
   }
 };
 
-const adminGetAllTasks = async (
-  req,
-  res
-) => {
+const adminGetAllTasks =
+async (req, res) => {
+
   try {
-    const tasks = await Task.findAll({
-      include: User,
-    });
+
+    const tasks =
+      await Task.findAll({
+
+        include: [
+          {
+            model: User,
+            attributes: [
+              "id",
+              "username",
+              "email",
+              "role",
+            ],
+          },
+        ],
+      });
 
     res.json(tasks);
+
   } catch (error) {
-    res.status(500).json(error);
+
+    console.log(error);
+
+    res.status(500).json({
+      message:
+        "Server error",
+    });
   }
 };
 
 module.exports = {
+
   getTasks,
+
   createTask,
+
   updateTask,
+
   deleteTask,
+
   adminGetAllTasks,
 };

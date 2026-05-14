@@ -8,25 +8,42 @@ import axios from "axios";
 const API =
   "http://localhost:5000/api/tasks";
 
+type Task = {
+  id: number;
+  title: string;
+  description: string;
+  completed: boolean;
+};
+
+type TaskState = {
+  tasks: Task[];
+};
+
+const initialState: TaskState = {
+  tasks: [],
+};
+
 export const fetchTasks =
   createAsyncThunk(
     "tasks/fetchTasks",
 
     async () => {
+
       const token =
         localStorage.getItem(
           "token"
         );
 
-      const res = await axios.get(
-        API,
-        {
-          headers: {
-            Authorization:
-              token,
-          },
-        }
-      );
+      const res =
+        await axios.get(
+          API,
+          {
+            headers: {
+              Authorization:
+                `Bearer ${token}`,
+            },
+          }
+        );
 
       return res.data;
     }
@@ -36,7 +53,7 @@ export const addTask =
   createAsyncThunk(
     "tasks/addTask",
 
-    async (task: {
+    async (taskData: {
       title: string;
       description: string;
     }) => {
@@ -49,11 +66,11 @@ export const addTask =
       const res =
         await axios.post(
           API,
-          task,
+          taskData,
           {
             headers: {
               Authorization:
-                token,
+                `Bearer ${token}`,
             },
           }
         );
@@ -78,7 +95,7 @@ export const deleteTask =
         {
           headers: {
             Authorization:
-              token,
+              `Bearer ${token}`,
           },
         }
       );
@@ -91,7 +108,7 @@ export const updateTask =
   createAsyncThunk(
     "tasks/updateTask",
 
-    async (task: any) => {
+    async (task: Task) => {
 
       const token =
         localStorage.getItem(
@@ -105,7 +122,7 @@ export const updateTask =
           {
             headers: {
               Authorization:
-                token,
+                `Bearer ${token}`,
             },
           }
         );
@@ -114,91 +131,85 @@ export const updateTask =
     }
   );
 
-type Task = {
-  id: number;
-  title: string;
-  description: string;
-  completed: boolean;
-};
+const taskSlice =
+  createSlice({
 
-type TaskState = {
-  tasks: Task[];
-};
+    name: "tasks",
 
-const initialState: TaskState = {
-  tasks: [],
-};
+    initialState,
 
-const taskSlice = createSlice({
-  name: "tasks",
+    reducers: {},
 
-  initialState,
+    extraReducers: (
+      builder
+    ) => {
 
-  reducers: {},
+      builder.addCase(
+        fetchTasks.fulfilled,
 
-  extraReducers: (
-    builder
-  ) => {
+        (
+          state,
+          action
+        ) => {
 
-    builder.addCase(
-      fetchTasks.fulfilled,
-      (
-        state,
-        action
-      ) => {
-        state.tasks =
-          action.payload;
-      }
-    );
+          state.tasks =
+            action.payload;
+        }
+      );
 
-    builder.addCase(
-      addTask.fulfilled,
-      (
-        state,
-        action
-      ) => {
-        state.tasks.push(
-          action.payload
-        );
-      }
-    );
+      builder.addCase(
+        addTask.fulfilled,
 
-    builder.addCase(
-      deleteTask.fulfilled,
-      (
-        state,
-        action
-      ) => {
-        state.tasks =
-          state.tasks.filter(
-            (
-              task
-            ) =>
-              task.id !==
-              action.payload
+        (
+          state,
+          action
+        ) => {
+
+          state.tasks.push(
+            action.payload
           );
-      }
-    );
+        }
+      );
 
-    builder.addCase(
-      updateTask.fulfilled,
-      (
-        state,
-        action
-      ) => {
-        state.tasks =
-          state.tasks.map(
-            (
-              task
-            ) =>
-              task.id ===
-              action.payload.id
-                ? action.payload
-                : task
-          );
-      }
-    );
-  },
-});
+      builder.addCase(
+        deleteTask.fulfilled,
 
-export default taskSlice.reducer;
+        (
+          state,
+          action
+        ) => {
+
+          state.tasks =
+            state.tasks.filter(
+              (task) =>
+                task.id !==
+                action.payload
+            );
+        }
+      );
+
+      builder.addCase(
+        updateTask.fulfilled,
+
+        (
+          state,
+          action
+        ) => {
+
+          state.tasks =
+            state.tasks.map(
+              (task) =>
+
+                task.id ===
+                action.payload.id
+
+                  ? action.payload
+                  : task
+            );
+        }
+      );
+    },
+  });
+
+export default
+  taskSlice.reducer;

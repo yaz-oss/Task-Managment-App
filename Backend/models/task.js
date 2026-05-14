@@ -1,26 +1,51 @@
-const { DataTypes } = require("sequelize");
+const { DataTypes } =
+require("sequelize");
 
-const sequelize = require("../config/db");
+const sequelize =
+require("../config/db");
 
-const User = require("./User");
+const Task =
+sequelize.define("Task", {
 
-const Task = sequelize.define("Task", {
   title: {
-    type: DataTypes.STRING,
+    type:
+      DataTypes.STRING,
   },
 
   description: {
-    type: DataTypes.TEXT,
+    type:
+      DataTypes.TEXT,
   },
 
   completed: {
-    type: DataTypes.BOOLEAN,
-    defaultValue: false,
+    type:
+      DataTypes.BOOLEAN,
+
+    defaultValue:
+      false,
+  },
+
+  assignedTo: {
+    type:
+      DataTypes.INTEGER,
+
+    allowNull: true,
+  },
+
+  assignedBy: {
+    type:
+      DataTypes.INTEGER,
+
+    allowNull: true,
+  },
+
+  assignedByAdmin: {
+    type:
+      DataTypes.BOOLEAN,
+
+    defaultValue:
+      false,
   },
 });
-
-User.hasMany(Task);
-
-Task.belongsTo(User);
 
 module.exports = Task;
