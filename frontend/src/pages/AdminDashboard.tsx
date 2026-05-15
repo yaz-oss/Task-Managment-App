@@ -1,6 +1,9 @@
 import { useCallback, useEffect, useState } from "react";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import {
+  useLocation,
+  useNavigate,
+} from "react-router-dom";
 
 import {
   LayoutDashboard,
@@ -45,6 +48,9 @@ const AdminDashboard = () => {
 
   const navigate = useNavigate();
 
+  const location =
+  useLocation();
+
   const token =
   localStorage.getItem("token");
 
@@ -56,9 +62,6 @@ const AdminDashboard = () => {
 
   const [darkMode, setDarkMode] =
   useState(true);
-
-  const [activePage, setActivePage] =
-  useState("dashboard");
 
   const [assignedUserId, setAssignedUserId] =
   useState("");
@@ -230,6 +233,17 @@ const AdminDashboard = () => {
     navigate("/");
   };
 
+  const activePage =
+  location.pathname.endsWith(
+    "/tasks"
+  )
+    ? "tasks"
+    : location.pathname.endsWith(
+        "/users"
+      )
+      ? "users"
+      : "dashboard";
+
   // REMOVE ADMIN FROM USERS LIST
 
   const normalUsers =
@@ -289,7 +303,7 @@ const AdminDashboard = () => {
 
         <button
           onClick={() =>
-            setActivePage("dashboard")
+            navigate("/admin")
           }
           className={
             activePage === "dashboard"
@@ -303,7 +317,7 @@ const AdminDashboard = () => {
 
         <button
           onClick={() =>
-            setActivePage("users")
+            navigate("/admin/users")
           }
           className={
             activePage === "users"
@@ -317,7 +331,7 @@ const AdminDashboard = () => {
 
         <button
           onClick={() =>
-            setActivePage("tasks")
+            navigate("/admin/tasks")
           }
           className={
             activePage === "tasks"

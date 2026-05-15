@@ -38,6 +38,16 @@ function App() {
           element={<AdminDashboard />}
         />
 
+        <Route
+          path="/admin/users"
+          element={<AdminDashboard />}
+        />
+
+        <Route
+          path="/admin/tasks"
+          element={<AdminDashboard />}
+        />
+
       
 
       <Route

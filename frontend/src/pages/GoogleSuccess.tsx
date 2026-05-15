@@ -19,10 +19,19 @@ const GoogleSuccess = () => {
       );
 
     const token =
-      params.get("token");
+      params.get("token") ||
+      params.get("accessToken") ||
+      params.get("jwt") ||
+      localStorage.getItem(
+        "token"
+      );
 
     const role =
-      params.get("role") || "user";
+      params.get("role") ||
+      localStorage.getItem(
+        "role"
+      ) ||
+      "user";
 
     const username =
       params.get("username") || "";

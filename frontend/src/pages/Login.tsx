@@ -1,4 +1,5 @@
 import {
+  useEffect,
   useState,
 } from "react";
 
@@ -31,6 +32,32 @@ function Login() {
   const [password,
     setPassword] =
     useState("");
+
+  useEffect(() => {
+
+    const token =
+      localStorage.getItem(
+        "token"
+      );
+
+    const role =
+      localStorage.getItem(
+        "role"
+      );
+
+    if (!token) {
+
+      return;
+    }
+
+    navigate(
+      role === "admin"
+        ? "/admin"
+        : "/dashboard",
+      { replace: true }
+    );
+
+  }, [navigate]);
 
   const handleLogin =
     async (
