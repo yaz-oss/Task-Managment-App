@@ -25,7 +25,7 @@ React, TypeScript, Vite, Tailwind CSS, Axios, React Router, and Lucide icons pow
 
 - Node.js
 - npm
-- Backend API running on `http://localhost:5000`
+- Backend API running on `https://task-managment-app-backend.onrender.com`
 
 ## Setup
 
@@ -58,4 +58,4 @@ npm run lint
 ## Notes
 
 - Auth tokens, roles, theme preference, username, and remembered email are stored in `localStorage`.
-- The frontend expects the backend auth, admin, and task routes to be available under `http://localhost:5000/api`.
+- The frontend expects the backend auth, admin, and task routes to be available under `https://task-managment-app-backend.onrender.com/api`.

@@ -17,6 +17,7 @@ import {
   Trash2,
   X,
 } from "lucide-react";
+import API from "../api/axios";
 
 type TaskStatus = "todo" | "in-progress" | "pending" | "completed";
 
@@ -57,8 +58,8 @@ function Dashboard() {
     if (!token) return;
 
     try {
-      const response = await axios.get<TaskType[]>(
-        "http://localhost:5000/api/tasks",
+      const response = await API.get<TaskType[]>(
+        "/api/tasks",
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -155,8 +156,8 @@ function Dashboard() {
 
     try {
       if (editingId) {
-        await axios.put(
-          `http://localhost:5000/api/tasks/${editingId}`,
+        await API.put(
+          `/api/tasks/${editingId}`,
           {
             title: title.trim(),
             description: description.trim(),
@@ -169,8 +170,8 @@ function Dashboard() {
         );
         setMessage("Task updated");
       } else {
-        await axios.post(
-          "http://localhost:5000/api/tasks",
+        await API.post(
+          "/api/tasks",
           {
             title: title.trim(),
             description: description.trim(),
@@ -194,8 +195,8 @@ function Dashboard() {
 
   const changeStatus = async (task: TaskType, status: TaskStatus) => {
     try {
-      await axios.put(
-        `http://localhost:5000/api/tasks/${task.id}`,
+      await API.put(
+        `/api/tasks/${task.id}`,
         {
           status,
           completed: status === "completed",
@@ -215,7 +216,7 @@ function Dashboard() {
 
   const deleteTask = async (id: number) => {
     try {
-      await axios.delete(`http://localhost:5000/api/tasks/${id}`, {
+      await API.delete(`/api/tasks/${id}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },

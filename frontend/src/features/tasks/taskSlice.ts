@@ -3,10 +3,10 @@ import {
   createAsyncThunk,
 } from "@reduxjs/toolkit";
 
-import axios from "axios";
+import API from "../../api/axios";
 
-const API =
-  "http://localhost:5000/api/tasks";
+const TASKS_API =
+  "/api/tasks";
 
 type Task = {
   id: number;
@@ -35,8 +35,8 @@ export const fetchTasks =
         );
 
       const res =
-        await axios.get(
-          API,
+        await API.get(
+          TASKS_API,
           {
             headers: {
               Authorization:
@@ -64,8 +64,8 @@ export const addTask =
         );
 
       const res =
-        await axios.post(
-          API,
+        await API.post(
+          TASKS_API,
           taskData,
           {
             headers: {
@@ -90,8 +90,8 @@ export const deleteTask =
           "token"
         );
 
-      await axios.delete(
-        `${API}/${id}`,
+      await API.delete(
+        `${TASKS_API}/${id}`,
         {
           headers: {
             Authorization:
@@ -116,8 +116,8 @@ export const updateTask =
         );
 
       const res =
-        await axios.put(
-          `${API}/${task.id}`,
+        await API.put(
+          `${TASKS_API}/${task.id}`,
           task,
           {
             headers: {
