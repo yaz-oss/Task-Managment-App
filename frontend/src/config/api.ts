@@ -4,4 +4,12 @@ const API_BASE_URL =
 export const apiUrl = (path: string) =>
   `${API_BASE_URL}${path.startsWith("/") ? path : `/${path}`}`;
 
-export const googleAuthUrl = apiUrl("/auth/google");
+export const getGoogleAuthUrl = () => {
+  const url = new URL(apiUrl("/auth/google"));
+
+  if (typeof window !== "undefined") {
+    url.searchParams.set("returnTo", window.location.origin);
+  }
+
+  return url.toString();
+};

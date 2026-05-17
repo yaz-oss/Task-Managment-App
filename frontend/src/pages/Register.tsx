@@ -13,7 +13,7 @@ import {
   User,
   UserPlus,
 } from "lucide-react";
-import { apiUrl, googleAuthUrl } from "../config/api";
+import { apiUrl, getGoogleAuthUrl } from "../config/api";
 
 function Register() {
   const navigate = useNavigate();
@@ -169,7 +169,7 @@ function Register() {
               <button
                 type="button"
                 onClick={() => {
-                  window.location.href = googleAuthUrl;
+                  window.location.href = getGoogleAuthUrl();
                 }}
                 className={`flex h-12 w-full items-center justify-center gap-3 rounded-2xl border text-sm font-bold transition ${
                   darkMode

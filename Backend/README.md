@@ -14,6 +14,7 @@ Set these values in your local `.env` file and in your hosting provider dashboar
 
 - `PORT` - API server port.
 - `CLIENT_URL` - Frontend URL allowed by CORS and used for Google OAuth redirects.
+- `CLIENT_URLS` - Optional comma-separated list of extra frontend URLs allowed for Google redirects.
 - `DB_HOST` - PostgreSQL host.
 - `DB_PORT` - PostgreSQL port.
 - `DB_NAME` - PostgreSQL database name.
