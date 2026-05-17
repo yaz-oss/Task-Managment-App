@@ -18,6 +18,7 @@ import {
   UserCheck,
   Users,
 } from "lucide-react";
+import { apiUrl } from "../config/api";
 
 interface Task {
   id: number;
@@ -74,7 +75,7 @@ function AdminDashboard() {
 
     try {
       const response = await axios.get<User[]>(
-        "http://localhost:5000/api/admin/users",
+        apiUrl("/admin/users"),
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -187,7 +188,7 @@ function AdminDashboard() {
 
   const deleteUser = async (id: number) => {
     try {
-      await axios.delete(`http://localhost:5000/api/admin/user/${id}`, {
+      await axios.delete(apiUrl(`/admin/user/${id}`), {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -203,7 +204,7 @@ function AdminDashboard() {
   const blockUser = async (id: number) => {
     try {
       const response = await axios.put<{ message: string }>(
-        `http://localhost:5000/api/admin/user/${id}/block`,
+        apiUrl(`/admin/user/${id}/block`),
         {},
         {
           headers: {
@@ -227,7 +228,7 @@ function AdminDashboard() {
 
     try {
       await axios.post(
-        "http://localhost:5000/api/admin/task/assign",
+        apiUrl("/admin/task/assign"),
         {
           userId: Number(assignedUserId),
           title: assignTitle.trim(),

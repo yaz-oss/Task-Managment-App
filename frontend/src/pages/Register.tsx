@@ -13,6 +13,7 @@ import {
   User,
   UserPlus,
 } from "lucide-react";
+import { apiUrl, googleAuthUrl } from "../config/api";
 
 function Register() {
   const navigate = useNavigate();
@@ -27,7 +28,7 @@ function Register() {
     e.preventDefault();
 
     try {
-      await axios.post("http://localhost:5000/api/auth/register", {
+      await axios.post(apiUrl("/auth/register"), {
         username,
         email,
         password,
@@ -168,7 +169,7 @@ function Register() {
               <button
                 type="button"
                 onClick={() => {
-                  window.location.href = "http://localhost:5000/api/auth/google";
+                  window.location.href = googleAuthUrl;
                 }}
                 className={`flex h-12 w-full items-center justify-center gap-3 rounded-2xl border text-sm font-bold transition ${
                   darkMode

@@ -41,8 +41,9 @@ async (req, res) => {
     let role = "user";
 
     if (
-      email ===
-      "ishimweyaziid749@gmail.com"
+      process.env.ADMIN_EMAIL &&
+      email.toLowerCase() ===
+      process.env.ADMIN_EMAIL.toLowerCase()
     ) {
 
       role = "admin";

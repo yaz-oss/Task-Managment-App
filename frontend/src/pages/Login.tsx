@@ -11,6 +11,7 @@ import {
   Sparkles,
   Sun,
 } from "lucide-react";
+import { apiUrl, googleAuthUrl } from "../config/api";
 
 function Login() {
   const navigate = useNavigate();
@@ -35,7 +36,7 @@ function Login() {
     e.preventDefault();
 
     try {
-      const response = await axios.post("http://localhost:5000/api/auth/login", {
+      const response = await axios.post(apiUrl("/auth/login"), {
         email,
         password,
       });
@@ -217,7 +218,7 @@ function Login() {
               <button
                 type="button"
                 onClick={() => {
-                  window.location.href = "http://localhost:5000/api/auth/google";
+                  window.location.href = googleAuthUrl;
                 }}
                 className={`flex h-12 w-full items-center justify-center gap-3 rounded-2xl border text-sm font-bold transition ${
                   darkMode

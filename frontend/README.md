@@ -33,6 +33,20 @@ React, TypeScript, Vite, Tailwind CSS, Axios, React Router, and Lucide icons pow
 npm install
 ```
 
+Copy the frontend environment example and update it for your backend URL:
+
+```bash
+cp .env.example .env
+```
+
+For local development:
+
+```bash
+VITE_API_URL=http://localhost:5000/api
+```
+
+For hosting, set `VITE_API_URL` to your deployed backend API URL.
+
 ## Development
 
 ```bash
@@ -58,4 +72,5 @@ npm run lint
 ## Notes
 
 - Auth tokens, roles, theme preference, username, and remembered email are stored in `localStorage`.
-- The frontend expects the backend auth, admin, and task routes to be available under `http://localhost:5000/api`.
+- Do not commit real `.env` files. They are ignored by git.
+- The frontend reads the backend API base URL from `VITE_API_URL`.

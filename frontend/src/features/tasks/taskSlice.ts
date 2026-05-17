@@ -5,8 +5,10 @@ import {
 
 import axios from "axios";
 
+import { apiUrl } from "../../config/api";
+
 const API =
-  "http://localhost:5000/api/tasks";
+  apiUrl("/tasks");
 
 type Task = {
   id: number;
