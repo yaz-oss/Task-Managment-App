@@ -32,11 +32,6 @@ require("./routes/adminRoutes");
 const userRoutes =
 require("./routes/userRoutes");
 
-const PORT =
-process.env.PORT || 5000;
-
-const CLIENT_URL =
-process.env.CLIENT_URL || "http://localhost:5173";
 
 // RELATIONS
 
@@ -55,7 +50,7 @@ app.use(
   cors({
 
     origin:
-      CLIENT_URL,
+      "http://localhost:5173",
 
     credentials:
       true,
@@ -103,12 +98,12 @@ sequelize.sync({
 .then(() => {
 
   app.listen(
-    PORT,
+    5000,
 
     () => {
 
       console.log(
-        `Server running on port ${PORT}`
+        "Server running on port 5000"
       );
     }
   );
