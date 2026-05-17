@@ -11,7 +11,7 @@ import {
   Sparkles,
   Sun,
 } from "lucide-react";
-import { apiUrl, getGoogleAuthUrl } from "../config/api";
+import { apiUrl, googleAuthUrl } from "../config/api";
 
 function Login() {
   const navigate = useNavigate();
@@ -218,7 +218,7 @@ function Login() {
               <button
                 type="button"
                 onClick={() => {
-                  window.location.href = getGoogleAuthUrl();
+                  window.location.href = googleAuthUrl;
                 }}
                 className={`flex h-12 w-full items-center justify-center gap-3 rounded-2xl border text-sm font-bold transition ${
                   darkMode

@@ -10,55 +10,6 @@ const jwt =
 const router =
   express.Router();
 
-const DEFAULT_CLIENT_URL =
-  process.env.CLIENT_URL || "http://localhost:5173";
-
-const allowedClientUrls = () =>
-  [
-    DEFAULT_CLIENT_URL,
-    ...(process.env.CLIENT_URLS || "")
-      .split(",")
-      .map((url) => url.trim())
-      .filter(Boolean),
-  ];
-
-const isLocalDevUrl = (url) => {
-  try {
-    const parsed = new URL(url);
-
-    return ["localhost", "127.0.0.1"].includes(parsed.hostname);
-  } catch {
-    return false;
-  }
-};
-
-const safeClientUrl = (url) => {
-  if (allowedClientUrls().includes(url) || isLocalDevUrl(url)) {
-    return url;
-  }
-
-  return DEFAULT_CLIENT_URL;
-};
-
-const encodeState = (value) =>
-  Buffer.from(JSON.stringify({ returnTo: safeClientUrl(value) })).toString(
-    "base64url"
-  );
-
-const decodeState = (state) => {
-  try {
-    if (!state) return DEFAULT_CLIENT_URL;
-
-    const parsed = JSON.parse(
-      Buffer.from(String(state), "base64url").toString("utf8")
-    );
-
-    return safeClientUrl(parsed.returnTo);
-  } catch {
-    return DEFAULT_CLIENT_URL;
-  }
-};
-
 const {
   register,
   login,
@@ -70,13 +21,9 @@ router.get(
 
   "/google",
 
-  (req, res, next) => {
-    const returnTo =
-      typeof req.query.returnTo === "string"
-        ? req.query.returnTo
-        : DEFAULT_CLIENT_URL;
-
-    passport.authenticate("google", {
+  passport.authenticate(
+    "google",
+    {
 
       scope: [
         "profile",
@@ -86,11 +33,8 @@ router.get(
       prompt:
         "select_account",
 
-      state:
-        encodeState(returnTo),
-
-    })(req, res, next);
-  }
+    }
+  )
 );
 
 router.post(
@@ -144,9 +88,7 @@ router.get(
 
           }
         );
-      const clientUrl =
-        decodeState(req.query.state);
-
+        console.log(req.user.role);
       if (
         req.user.role ===
         "admin"
@@ -154,13 +96,13 @@ router.get(
 
         return res.redirect(
 
-          `${clientUrl}/google-success?token=${encodeURIComponent(token)}&role=admin&username=${encodeURIComponent(req.user.username)}`
+          `${process.env.CLIENT_URL}/google-success?token=${encodeURIComponent(token)}&role=admin&username=${encodeURIComponent(req.user.username)}`
         );
       }
 
       return res.redirect(
 
-        `${clientUrl}/google-success?token=${encodeURIComponent(token)}&role=user&username=${encodeURIComponent(req.user.username)}`
+        `${process.env.CLIENT_URL}/google-success?token=${encodeURIComponent(token)}&role=user&username=${encodeURIComponent(req.user.username)}`
       );
 
     } catch (error) {
