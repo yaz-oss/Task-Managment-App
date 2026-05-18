@@ -48,7 +48,7 @@ express();
 
 app.use(cors(
   {
-  origin: "https://yourfrontend.vercel.app",
+  origin: "https://task-management-app-frontend-sable.vercel.app",
   credentials: true
 }
 ));
@@ -63,6 +63,16 @@ app.use(
 
 
 // ROUTES
+
+
+app.get("/", (req, res) => {
+  res.send("Backend is working");
+});
+
+app.get("/test", (req, res) => {
+  res.send("Test route works");
+});
+
 
 app.use(
   "/api/auth",

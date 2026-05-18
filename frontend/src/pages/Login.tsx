@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   Eye,
   EyeOff,
@@ -15,6 +15,9 @@ import API from "../api/axios";
 
 function Login() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const blockedMessage =
+    (location.state as { message?: string } | null)?.message || "";
   const rememberedEmail = localStorage.getItem("rememberedEmail") || "";
 
   const [darkMode, setDarkMode] = useState(true);
@@ -22,15 +25,21 @@ function Login() {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(Boolean(rememberedEmail));
+  const [message, setMessage] = useState(blockedMessage);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
     const role = localStorage.getItem("role");
 
+    if (blockedMessage) {
+      window.history.replaceState({}, document.title);
+      return;
+    }
+
     if (!token) return;
 
     navigate(role === "admin" ? "/admin" : "/dashboard", { replace: true });
-  }, [navigate]);
+  }, [blockedMessage, navigate]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -41,6 +50,7 @@ function Login() {
         password,
       });
 
+      setMessage("");
       localStorage.setItem("token", response.data.token);
       localStorage.setItem("role", response.data.role);
 
@@ -60,7 +70,7 @@ function Login() {
         ? (error.response?.data as { message?: string } | undefined)?.message
         : undefined;
 
-      alert(message || "Login failed");
+      setMessage(message || "Login failed");
     }
   };
 
@@ -68,7 +78,7 @@ function Login() {
     <main
       className={`theme-app min-h-screen overflow-hidden ${
         darkMode
-          ? "dark bg-[#030712] text-white"
+          ? "dark bg-[#111b38] text-slate-100"
           : "bg-gradient-to-br from-rose-50 via-sky-50 to-emerald-50 text-slate-950"
       }`}
     >
@@ -116,8 +126,10 @@ function Login() {
 
           <div
             className={`p-6 sm:p-10 ${
-              darkMode ? "bg-slate-950/[0.72]" : "bg-white/[0.82]"
-            }`}
+              darkMode
+                ? "bg-slate-900/75 border border-slate-800/50"
+                : "bg-white/[0.82]"
+            } rounded-[24px] shadow-2xl shadow-slate-950/10`}
           >
             <div className="mb-8 flex items-center justify-between">
               <div>
@@ -143,12 +155,26 @@ function Login() {
             </div>
 
             <form onSubmit={handleLogin} className="space-y-5">
+              {message && (
+                <div
+                  className={`rounded-2xl border px-4 py-3 text-sm font-semibold ${
+                    message.toLowerCase().includes("blocked")
+                      ? "border-red-300 bg-red-50 text-red-700"
+                      : darkMode
+                        ? "border-amber-400/30 bg-amber-400/10 text-amber-100"
+                        : "border-amber-200 bg-amber-50 text-amber-700"
+                  }`}
+                >
+                  {message}
+                </div>
+              )}
+
               <label className="block">
                 <span className="mb-2 block text-sm font-semibold">Email</span>
                 <span
                   className={`flex h-12 items-center rounded-2xl border px-4 transition focus-within:border-sky-400 ${
                     darkMode
-                      ? "border-white/[0.12] bg-white/[0.08]"
+                      ? "border-slate-700/60 bg-slate-900/40"
                       : "border-slate-200 bg-white"
                   }`}
                 >
@@ -169,7 +195,7 @@ function Login() {
                 <span
                   className={`flex h-12 items-center rounded-2xl border px-4 transition focus-within:border-sky-400 ${
                     darkMode
-                      ? "border-white/[0.12] bg-white/[0.08]"
+                      ? "border-slate-700/60 bg-slate-900/40"
                       : "border-slate-200 bg-white"
                   }`}
                 >
@@ -222,7 +248,7 @@ function Login() {
                 }}
                 className={`flex h-12 w-full items-center justify-center gap-3 rounded-2xl border text-sm font-bold transition ${
                   darkMode
-                    ? "border-sky-400/25 bg-slate-950 text-slate-100 shadow-lg shadow-sky-500/10 hover:bg-slate-900"
+                    ? "border-sky-400/20 bg-slate-900/70 text-slate-100 shadow-lg shadow-sky-500/10 hover:bg-slate-800"
                     : "border-slate-200 bg-white hover:bg-slate-50"
                 }`}
               >
